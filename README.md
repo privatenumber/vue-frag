@@ -12,3 +12,55 @@ Vue 2 fragment directive to unwrap root elements
 npm i vue-frag
 ```
 
+
+## 🚦 Quick Setup
+
+#### Register globally
+Make it available anywhere in your Vue application.
+
+```js
+import frag from 'vue-frag';
+Vue.directive('frag', frag);
+```
+
+#### Register locally
+Explicitly register it to a component you want to use it in.
+
+```vue
+...
+
+<script>
+import frag from 'vue-frag';
+
+export default {
+    directives: {
+        frag
+    },
+
+    ...
+};
+</script>
+```
+
+## 👨🏻‍🏫 Examples
+
+#### Returning multiple root nodes
+```vue
+<template>
+    <div #frag> <!-- This element will be unwrapped -->
+
+        <div v-for="i in 10">
+            {{ i }}
+        </div>
+    </div>
+</template>
+```
+
+#### Unwrapping the root node from a component
+```vue
+<template>
+    <div>
+        <some-custom-component #frag />
+    </div>
+</template>
+```
