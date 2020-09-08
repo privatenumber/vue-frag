@@ -33,9 +33,9 @@ Explicitly register it to a component you want to use it in.
 import frag from 'vue-frag';
 
 export default {
-	directives: {
-		frag
-	}
+    directives: {
+        frag
+    }
 };
 </script>
 ```
@@ -45,20 +45,20 @@ export default {
 #### Returning multiple root nodes
 ```vue
 <template>
-	<div #frag> <!-- This element will be unwrapped -->
+    <div #frag> <!-- This element will be unwrapped -->
 
-		<div v-for="i in 10">
-			{{ i }}
-		</div>
-	</div>
+        <div v-for="i in 10">
+            {{ i }}
+        </div>
+    </div>
 </template>
 ```
 
 #### Unwrapping the root node from a component
 ```vue
 <template>
-	<div>
-		<some-custom-component #frag />
-	</div>
+    <div>
+        <some-custom-component #frag />
+    </div>
 </template>
 ```
