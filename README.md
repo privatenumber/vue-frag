@@ -47,7 +47,7 @@ export default {
 #### Returning multiple root nodes
 ```vue
 <template>
-    <div #frag> <!-- This element will be unwrapped -->
+    <div v-frag> <!-- This element will be unwrapped -->
 
         <div v-for="i in 10">
             {{ i }}
@@ -60,7 +60,7 @@ export default {
 ```vue
 <template>
     <div>
-        <some-custom-component #frag />
+        <some-custom-component v-frag />
     </div>
 </template>
 ```
