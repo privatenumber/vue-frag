@@ -19,13 +19,13 @@ const rollupConfig = {
 		{
 			format: 'cjs',
 			file: 'dist/frag.cjs.js',
-			exports: 'named',
+			exports: 'default',
 		},
 		{
 			format: 'umd',
 			file: 'dist/frag.js',
 			name: 'Frag',
-			exports: 'named',
+			exports: 'default',
 		},
 	],
 };

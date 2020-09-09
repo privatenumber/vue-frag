@@ -1,1 +1,1 @@
-"use strict";Object.defineProperty(exports,"__esModule",{value:!0});var e={inserted:function(e){var t=document.createDocumentFragment();t.append.apply(t,e.childNodes),e.replaceWith(t)}};exports.default=e;
+"use strict";var e={inserted:function(e){var t=document.createDocumentFragment();t.append.apply(t,e.childNodes),e.replaceWith(t)}};module.exports=e;
