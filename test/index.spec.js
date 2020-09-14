@@ -37,35 +37,224 @@ test('Root frag', () => {
 	attachTo.remove();
 });
 
-test('Reactive', async () => {
-	const TestComponent = {
-		template: `
-			<span v-frag>Hello world {{ number }}</span>
-		`,
-		directives: {
-			frag,
-		},
-		props: ['number'],
-	};
+describe('Reactivity', () => {
+	test('Data', async () => {
+		const TestComponent = {
+			template: `
+				<span v-frag>Hello world {{ number }}</span>
+			`,
+			directives: {
+				frag,
+			},
+			props: ['number'],
+		};
 
-	const usage = {
-		template: `
-			<article><test-component :number="number" /></article>
-		`,
-		components: {
-			TestComponent,
-		},
-		data() {
-			return {
-				number: 0,
-			};
-		},
-	};
+		const usage = {
+			template: `
+				<article><test-component :number="number" /></article>
+			`,
+			components: {
+				TestComponent,
+			},
+			data() {
+				return {
+					number: 0,
+				};
+			},
+		};
 
-	const wrapper = mount(usage);
-	const number = Date.now();
-	wrapper.setData({number});
-	await wrapper.vm.$nextTick();
+		const wrapper = mount(usage);
+		const number = Date.now();
+		wrapper.setData({number});
+		await wrapper.vm.$nextTick();
 
-	expect(wrapper.html()).toBe(`<article>Hello world ${number}</article>`);
+		expect(wrapper.html()).toBe(`<article>Hello world ${number}</article>`);
+	});
+
+	test('v-if template', async () => {
+		const TestComponent = {
+			template: `
+				<span v-frag>
+					<template v-if="show">A</template>
+				</span>
+			`,
+			directives: {
+				frag,
+			},
+			props: ['show'],
+		};
+
+		const usage = {
+			template: `
+				<div class="wrapper">
+					<test-component :show="show" />
+				</div>
+			`,
+			components: {
+				TestComponent,
+			},
+			data() {
+				return {
+					show: false,
+				};
+			},
+		};
+
+		const empty = '<div class="wrapper">\n  <!---->\n</div>';
+		const ifTrue = '<div class="wrapper">A</div>';
+
+		const wrapper = mount(usage);
+		expect(wrapper.html()).toBe(empty);
+
+		wrapper.setData({show: true});
+		await wrapper.vm.$nextTick();
+		expect(wrapper.html()).toBe(ifTrue);
+
+		wrapper.setData({show: false});
+		await wrapper.vm.$nextTick();
+		expect(wrapper.html()).toBe(empty);
+
+		wrapper.setData({show: true});
+		await wrapper.vm.$nextTick();
+		expect(wrapper.html()).toBe(ifTrue);
+	});
+
+	test('v-if element', async () => {
+		const TestComponent = {
+			template: `
+				<span v-frag>
+					<div v-if="show">A</div>
+				</span>
+			`,
+			directives: {
+				frag,
+			},
+			props: ['show'],
+		};
+
+		const usage = {
+			template: `
+				<div class="wrapper">
+					<test-component :show="show" />
+				</div>
+			`,
+			components: {
+				TestComponent,
+			},
+			data() {
+				return {
+					show: false,
+				};
+			},
+		};
+
+		const empty = '<div class="wrapper">\n  <!---->\n</div>';
+		const ifTrue = '<div class="wrapper">\n  <div>A</div>\n</div>';
+
+		const wrapper = mount(usage);
+		expect(wrapper.html()).toBe(empty);
+
+		wrapper.setData({show: true});
+		await wrapper.vm.$nextTick();
+		expect(wrapper.html()).toBe(ifTrue);
+
+		wrapper.setData({show: false});
+		await wrapper.vm.$nextTick();
+		expect(wrapper.html()).toBe(empty);
+
+		wrapper.setData({show: true});
+		await wrapper.vm.$nextTick();
+		expect(wrapper.html()).toBe(ifTrue);
+	});
+
+	test('v-for template', async () => {
+		const TestComponent = {
+			template: `
+				<span v-frag>
+					<template v-for="i in num">{{ i }}</template>
+				</span>
+			`,
+			directives: {
+				frag,
+			},
+			props: ['num'],
+		};
+
+		const usage = {
+			template: `
+				<div>
+					<test-component :num="num" />
+				</div>
+			`,
+			components: {
+				TestComponent,
+			},
+			data() {
+				return {
+					num: 0,
+				};
+			},
+		};
+
+		const tpl = number => `<div>${number}</div>`;
+
+		const wrapper = mount(usage);
+		expect(wrapper.html()).toBe(tpl(''));
+
+		wrapper.setData({num: 1});
+		await wrapper.vm.$nextTick();
+		expect(wrapper.html()).toBe(tpl('1'));
+
+		wrapper.setData({num: 2});
+		await wrapper.vm.$nextTick();
+		expect(wrapper.html()).toBe(tpl('12'));
+
+		wrapper.setData({num: 3});
+		await wrapper.vm.$nextTick();
+		expect(wrapper.html()).toBe(tpl('123'));
+	});
+
+	test('v-for element', async () => {
+		const TestComponent = {
+			template: `
+				<span v-frag>
+					<div v-for="i in num">{{ i }}</div>
+				</span>
+			`,
+			directives: {
+				frag,
+			},
+			props: ['num'],
+		};
+
+		const usage = {
+			template: `
+				<div>
+					<test-component :num="num" />
+				</div>
+			`,
+			components: {
+				TestComponent,
+			},
+			data() {
+				return {
+					num: 1,
+				};
+			},
+		};
+
+		const tpl = number => `<div>\n  ${number.map(n => `<div>${n}</div>`).join('\n  ')}\n</div>`;
+
+		const wrapper = mount(usage);
+		await wrapper.vm.$nextTick();
+		expect(wrapper.html()).toBe(tpl([1]));
+
+		wrapper.setData({num: 2});
+		await wrapper.vm.$nextTick();
+		expect(wrapper.html()).toBe(tpl([1, 2]));
+
+		wrapper.setData({num: 3});
+		await wrapper.vm.$nextTick();
+		expect(wrapper.html()).toBe(tpl([1, 2, 3]));
+	});
 });

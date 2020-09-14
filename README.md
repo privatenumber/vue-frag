@@ -64,3 +64,10 @@ export default {
     </div>
 </template>
 ```
+
+## 💁‍♀️ FAQ
+
+### How does this work?
+Vue associates vNodes with specific DOM references so once a component has mounted, the DOM nodes can be moved around and Vue will still be able to mutate them by reference. The Frag directive simply replaces the root element of a component in the DOM with it's children upon DOM insertion, and monkey-patches native properties like `parentNode` on the children to make Vue think they're still using the component root element.
+
+
