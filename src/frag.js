@@ -1,7 +1,9 @@
 function setFakeParent(node, fakeParent) {
-	Object.defineProperty(node, 'parentNode', {
-		get: () => fakeParent,
-	});
+	if (!Object.getOwnPropertyDescriptor(node, 'parentNode')) {
+		Object.defineProperty(node, 'parentNode', {
+			get: () => fakeParent,
+		});
+	}
 }
 
 const frag = {
@@ -44,7 +46,7 @@ const frag = {
 					const refNode = nodes[length_ - 1];
 					refNode.after(node);
 				} else {
-					parent.append(node);
+					parent.append(node); // Test
 				}
 
 				setFakeParent(node, element);

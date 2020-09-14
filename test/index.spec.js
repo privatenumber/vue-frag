@@ -257,4 +257,105 @@ describe('Reactivity', () => {
 		await wrapper.vm.$nextTick();
 		expect(wrapper.html()).toBe(tpl([1, 2, 3]));
 	});
+
+	test('slot w/ v-if', async () => {
+		const TestComponent = {
+			template: `
+				<span v-frag>
+					<template v-if="show">{{ name }}</template>
+					<slot />
+				</span>
+			`,
+			directives: {
+				frag,
+			},
+			props: ['name', 'show'],
+		};
+
+		const usage = {
+			template: `
+				<div class="wrapper">
+					<test-component name="A" :show="show">
+						<test-component name="B" :show="show" />
+					</test-component>
+				</div>
+			`,
+			components: {
+				TestComponent,
+			},
+			data() {
+				return {
+					show: false,
+				};
+			},
+		};
+
+		const empty = '<div class="wrapper">\n  <!---->\n  <!---->\n</div>';
+		const ifTrue = '<div class="wrapper">A B </div>';
+
+		const wrapper = mount(usage);
+		expect(wrapper.html()).toBe(empty);
+
+		wrapper.setData({show: true});
+		await wrapper.vm.$nextTick();
+		expect(wrapper.html()).toBe(ifTrue);
+
+		wrapper.setData({show: false});
+		await wrapper.vm.$nextTick();
+		expect(wrapper.html()).toBe(empty);
+
+		wrapper.setData({show: true});
+		await wrapper.vm.$nextTick();
+		expect(wrapper.html()).toBe(ifTrue);
+	});
+
+	test('slot w/ v-for', async () => {
+		const TestComponent = {
+			template: `
+				<span v-frag>
+					<div v-for="i in num">{{ name }} {{ i }}</div>
+					<slot />
+				</span>
+			`,
+			directives: {
+				frag,
+			},
+			props: ['name', 'num'],
+		};
+
+		const usage = {
+			template: `
+				<div>
+					<test-component name="A" :num="num">
+						<test-component name="B" :num="num">
+							<test-component name="C" :num="num" />
+							</test-component>
+						</test-component>
+					</test-component>
+				</div>
+			`,
+			components: {
+				TestComponent,
+			},
+			data() {
+				return {
+					num: 1,
+				};
+			},
+		};
+
+		const tpl = number => `<div>\n  ${number.map(n => `<div>${n}</div>`).join('\n  ')}\n</div>`;
+
+		const wrapper = mount(usage);
+		await wrapper.vm.$nextTick();
+		expect(wrapper.html()).toBe(tpl(['A 1', 'B 1', 'C 1']));
+
+		wrapper.setData({num: 2});
+		await wrapper.vm.$nextTick();
+		expect(wrapper.html()).toBe(tpl(['A 1', 'A 2', 'B 1', 'B 2', 'C 1', 'C 2']));
+
+		wrapper.setData({num: 3});
+		await wrapper.vm.$nextTick();
+		expect(wrapper.html()).toBe(tpl(['A 1', 'A 2', 'A 3', 'B 1', 'B 2', 'B 3', 'C 1', 'C 2', 'C 3']));
+	});
 });
