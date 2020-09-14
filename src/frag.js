@@ -1,8 +1,6 @@
 function setFakeParent(node, fakeParent) {
 	Object.defineProperty(node, 'parentNode', {
-		get() {
-			return fakeParent;
-		},
+		get: () => fakeParent,
 	});
 }
 
