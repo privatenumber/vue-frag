@@ -24,6 +24,7 @@ const parentPatches = {
 		if (hasFakeChildren) {
 			node.append(...hasFakeChildren.splice(0));
 			fc.delete(node);
+			node[$fakeParent] = undefined;
 			return;
 		}
 
