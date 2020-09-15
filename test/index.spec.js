@@ -436,3 +436,41 @@ test('Parent multiple v-if', async () => {
 
 	expect(wrapper.html()).toBe('<article>\n  <div>Hello world A</div>\n  <!---->\n  <div>Hello world C</div>\n</article>');
 });
+
+test('v-html', async () => {
+	const TestComponent = {
+		template: '<span v-frag v-html="code" />',
+		directives: {
+			frag,
+		},
+		props: ['num'],
+		computed: {
+			code() {
+				return `<div>${this.num}</div><div>${this.num + 1}</div>`;
+			},
+		},
+	};
+
+	const usage = {
+		template: '<article><test-component :num="num"/></article>',
+		components: {
+			TestComponent,
+		},
+		data() {
+			return {
+				num: 0,
+			};
+		},
+	};
+
+	const wrapper = mount(usage);
+	expect(wrapper.html()).toBe('<article>\n  <div>0</div>\n  <div>1</div>\n</article>');
+
+	wrapper.setData({num: 1});
+	await wrapper.vm.$nextTick();
+	expect(wrapper.html()).toBe('<article>\n  <div>1</div>\n  <div>2</div>\n</article>');
+
+	wrapper.setData({num: 2});
+	await wrapper.vm.$nextTick();
+	expect(wrapper.html()).toBe('<article>\n  <div>2</div>\n  <div>3</div>\n</article>');
+});
