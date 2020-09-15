@@ -92,6 +92,22 @@ const frag = {
 
 		nodes.forEach(node => setFakeParent(node, element));
 
+		// Handle v-html
+		Object.defineProperty(element, 'innerHTML', {
+			set(htmlString) {
+				const domify = document.createElement('div');
+				domify.innerHTML = htmlString;
+
+				const oldNodesIdx = element.frag.length;
+				// eslint-disable-next-line unicorn/prefer-node-append
+				Array.from(domify.childNodes).forEach(node => element.appendChild(node));
+				domify.append(...element.frag.splice(0, oldNodesIdx));
+			},
+			get() {
+				return '';
+			},
+		});
+
 		Object.assign(element, elementPatches);
 	},
 };
