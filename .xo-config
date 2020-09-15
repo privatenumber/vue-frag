@@ -3,7 +3,8 @@
 		"browser"
 	],
 	"rules": {
-		"comma-dangle": ["error", "always-multiline"]
+		"comma-dangle": ["error", "always-multiline"],
+		"symbol-description": "off"
 	},
 	"overrides": [
 		{
