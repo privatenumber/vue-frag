@@ -359,3 +359,80 @@ describe('Reactivity', () => {
 		expect(wrapper.html()).toBe(tpl(['A 1', 'A 2', 'A 3', 'B 1', 'B 2', 'B 3', 'C 1', 'C 2', 'C 3']));
 	});
 });
+
+test('Parent v-if', async () => {
+	const TestComponent = {
+		template: '<span v-frag>Hello world</span>',
+		directives: {
+			frag,
+		},
+	};
+
+	const usage = {
+		template: `
+			<article><test-component v-if="show" /></article>
+		`,
+		components: {
+			TestComponent,
+		},
+		data() {
+			return {
+				show: true,
+			};
+		},
+	};
+
+	const wrapper = mount(usage);
+	expect(wrapper.html()).toBe('<article>Hello world</article>');
+
+	wrapper.setData({show: false});
+	await wrapper.vm.$nextTick();
+
+	expect(wrapper.html()).toBe('<article>\n  <!---->\n</article>');
+
+	wrapper.setData({show: true});
+	await wrapper.vm.$nextTick();
+
+	expect(wrapper.html()).toBe('<article>Hello world</article>');
+});
+
+test('Parent multiple v-if', async () => {
+	const TestComponent = {
+		template: '<span v-frag><div>Hello world {{ name }}</div></span>',
+		directives: {
+			frag,
+		},
+		props: ['name'],
+	};
+
+	const usage = {
+		template: `
+			<article>
+				<test-component name="A" key="a" v-if="show" />
+				<test-component name="B" key="b" v-if="!show"/>
+				<test-component name="C" key="c" v-if="show" />
+			</article>
+		`,
+		components: {
+			TestComponent,
+		},
+		data() {
+			return {
+				show: true,
+			};
+		},
+	};
+
+	const wrapper = mount(usage);
+	expect(wrapper.html()).toBe('<article>\n  <div>Hello world A</div>\n  <!---->\n  <div>Hello world C</div>\n</article>');
+
+	wrapper.setData({show: false});
+	await wrapper.vm.$nextTick();
+
+	expect(wrapper.html()).toBe('<article>\n  <!---->\n  <div>Hello world B</div>\n  <!---->\n</article>');
+
+	wrapper.setData({show: true});
+	await wrapper.vm.$nextTick();
+
+	expect(wrapper.html()).toBe('<article>\n  <div>Hello world A</div>\n  <!---->\n  <div>Hello world C</div>\n</article>');
+});

@@ -10,14 +10,33 @@ const frag = {
 	inserted(element) {
 		const nodes = Array.from(element.childNodes);
 
-		const parent = element.parentNode; /* Replace with template */
+		const {parentNode: parent} = element;
+
 		const fragment = document.createDocumentFragment();
 		fragment.append(...element.childNodes);
 		element.replaceWith(fragment);
 
-		nodes.forEach(node => setFakeParent(node, element));
-
 		element.frag = nodes;
+
+		const {insertBefore, removeChild} = parent;
+		Object.assign(parent, {
+			insertBefore(newNode, refNode) {
+				return insertBefore.call(parent, newNode, refNode === element ? nodes[0] : refNode);
+			},
+			removeChild(node) {
+				if (node === element) {
+					element.append(...element.frag);
+					element.frag.splice(0);
+					return;
+				}
+
+				return Reflect.apply(removeChild, this, arguments);
+			},
+		});
+
+		setFakeParent(element, parent);
+
+		nodes.forEach(node => setFakeParent(node, element));
 
 		Object.assign(element, {
 			insertBefore(newNode, refNode) {
