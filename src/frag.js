@@ -16,18 +16,13 @@ const $fakeChildren = Symbol();
 const parentPatches = {
 	insertBefore(newNode, refNode) {
 		const hasFakeChildren = this[$fakeChildren].get(refNode);
-		if (hasFakeChildren) {
-			refNode = hasFakeChildren[0];
-		}
-
-		return Element.prototype.insertBefore.call(this, newNode, refNode);
+		return Element.prototype.insertBefore.call(this, newNode, hasFakeChildren ? hasFakeChildren[0] : refNode);
 	},
 	removeChild(node) {
 		const fc = this[$fakeChildren];
 		const hasFakeChildren = fc.get(node);
 		if (hasFakeChildren) {
-			node.append(...hasFakeChildren);
-			hasFakeChildren.splice(0);
+			node.append(...hasFakeChildren.splice(0));
 			fc.delete(node);
 			return;
 		}
@@ -52,9 +47,8 @@ const elementPatches = {
 			this.frag.splice(idx, 0, newNode);
 		}
 
-		const node = refNode.parentElement.insertBefore(newNode, refNode);
-		setFakeParent(node, this);
-		return node;
+		refNode.parentElement.insertBefore(newNode, refNode);
+		setFakeParent(newNode, this);
 	},
 
 	removeChild(node) {
@@ -63,20 +57,18 @@ const elementPatches = {
 			this.frag.splice(idx, 1);
 		}
 
-		return node.remove();
+		node.remove();
 	},
 
 	appendChild(node) {
-		const length_ = this.frag.length;
-		if (length_ > 0) {
-			const refNode = this.frag[length_ - 1];
-			refNode.after(node);
+		const {length} = this.frag;
+		if (length) {
+			this.frag[length - 1].after(node);
 		} else {
 			this.parentNode.append(node);
 		}
 
 		setFakeParent(node, this);
-
 		this.frag.push(node);
 	},
 };
