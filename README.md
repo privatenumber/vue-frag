@@ -71,6 +71,7 @@ export default {
 ```vue
 <template>
     <div>
+        <!-- Unwraps the root node of some-custom-component -->
         <some-custom-component v-frag />
     </div>
 </template>
@@ -83,6 +84,23 @@ export default {
         <template v-if />
     </div>
 </template>
+```
+
+#### Access fragment DOM nodes
+```vue
+<template>
+    <div v-frag>
+        Hello world
+    </div>
+</template>
+
+<script>
+export default {
+    mounted() {
+        console.log(this.$el.frag)
+    }
+}
+</script>
 ```
 
 ## 💁‍♀️ FAQ
