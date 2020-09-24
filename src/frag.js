@@ -16,12 +16,12 @@ const parentPatches = {
 	insertBefore(newNode, refNode) {
 		const hasFakeChildren = this[$fakeChildren].get(refNode);
 		(hasFakeChildren ? hasFakeChildren[0] : refNode).before(newNode);
-		// Return Element.prototype.insertBefore.call(this, newNode, hasFakeChildren ? hasFakeChildren[0] : refNode);
 	},
 	removeChild(node) {
 		const fc = this[$fakeChildren];
 		const hasFakeChildren = fc.get(node);
 		if (hasFakeChildren) {
+			// Revert fake parent on these
 			node.append(...hasFakeChildren.splice(0));
 			fc.delete(node);
 			node[$fakeParent] = undefined;
@@ -29,7 +29,6 @@ const parentPatches = {
 		}
 
 		node.remove();
-		// Return Element.prototype.removeChild.call(this, node);
 	},
 };
 
@@ -92,15 +91,12 @@ const elementPatches = {
 	},
 };
 
-const $originalParent = Symbol();
-
 const frag = {
 	inserted(element) {
 		const nodes = Array.from(element.childNodes);
 
 		const {parentNode: parent} = element;
 
-		element[$originalParent] = parent;
 		const placeholder = document.createComment('');
 		element[$placeholder] = placeholder;
 		if (nodes.length === 0) {
