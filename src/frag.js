@@ -11,6 +11,14 @@ function setFakeParent(node, fakeParent) {
 	}
 }
 
+const resetChildren = (frag, moveTo) => {
+	const nodes = frag.splice(0);
+	moveTo.append(...nodes);
+	nodes.forEach(node => {
+		node[$fakeParent] = undefined;
+	});
+};
+
 const $fakeChildren = Symbol();
 const parentPatches = {
 	insertBefore(newNode, refNode) {
@@ -21,8 +29,7 @@ const parentPatches = {
 		const fc = this[$fakeChildren];
 		const hasFakeChildren = fc.get(node);
 		if (hasFakeChildren) {
-			// Revert fake parent on these
-			node.append(...hasFakeChildren.splice(0));
+			resetChildren(hasFakeChildren, node);
 			fc.delete(node);
 			node[$fakeParent] = undefined;
 			return;
@@ -135,17 +142,8 @@ const frag = {
 	},
 
 	unbind(element) {
-		if (element.frag.length > 0) { // Should always be true...
-			element[$fakeParent] = undefined;
-			const nodes = element.frag.splice(0);
-			element.append(...nodes);
-			nodes.forEach(node => {
-				node[$fakeParent] = undefined;
-			});
-
-			element[$placeholder].remove();
-			element.frag = undefined;
-		}
+		resetChildren(element.frag, element);
+		element[$placeholder].remove();
 	},
 };
 
