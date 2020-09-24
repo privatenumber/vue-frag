@@ -116,8 +116,6 @@ const frag = {
 		nodes.forEach(node => setFakeParent(node, element));
 
 		// Handle v-html
-
-		// Convert to setter in elementPatches?
 		Object.defineProperty(element, 'innerHTML', {
 			set(htmlString) {
 				const domify = document.createElement('div');
