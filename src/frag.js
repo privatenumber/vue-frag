@@ -2,11 +2,10 @@ const $fakeParent = Symbol();
 
 function setFakeParent(node, fakeParent) {
 	if (!node[$fakeParent]) {
-		const {parentNode} = node;
 		node[$fakeParent] = fakeParent;
 		Object.defineProperty(node, 'parentNode', {
 			get() {
-				return this[$fakeParent] || parentNode;
+				return this[$fakeParent] || this.parentElement;
 			},
 		});
 	}
@@ -16,7 +15,8 @@ const $fakeChildren = Symbol();
 const parentPatches = {
 	insertBefore(newNode, refNode) {
 		const hasFakeChildren = this[$fakeChildren].get(refNode);
-		return Element.prototype.insertBefore.call(this, newNode, hasFakeChildren ? hasFakeChildren[0] : refNode);
+		(hasFakeChildren ? hasFakeChildren[0] : refNode).before(newNode);
+		// Return Element.prototype.insertBefore.call(this, newNode, hasFakeChildren ? hasFakeChildren[0] : refNode);
 	},
 	removeChild(node) {
 		const fc = this[$fakeChildren];
@@ -28,7 +28,8 @@ const parentPatches = {
 			return;
 		}
 
-		return Element.prototype.removeChild.call(this, node);
+		node.remove();
+		// Return Element.prototype.removeChild.call(this, node);
 	},
 };
 
@@ -41,6 +42,8 @@ function patchParent(parent, child, nodes) {
 	parent[$fakeChildren].set(child, nodes);
 }
 
+const $placeholder = Symbol();
+
 const elementPatches = {
 	insertBefore(newNode, refNode) {
 		const idx = this.frag.indexOf(refNode);
@@ -48,8 +51,21 @@ const elementPatches = {
 			this.frag.splice(idx, 0, newNode);
 		}
 
-		refNode.parentElement.insertBefore(newNode, refNode);
+		refNode.before(newNode);
+
 		setFakeParent(newNode, this);
+	},
+
+	before(newNode) {
+		this.frag[0].before(newNode);
+	},
+
+	remove() {
+		const placeholder = this[$placeholder];
+		const {frag} = this;
+		const removed = frag.splice(0, frag.length, placeholder);
+		removed[0].before(this[$placeholder]);
+		removed.forEach(element => element.remove());
 	},
 
 	removeChild(node) {
@@ -63,10 +79,12 @@ const elementPatches = {
 
 	appendChild(node) {
 		const {length} = this.frag;
-		if (length) {
-			this.frag[length - 1].after(node);
-		} else {
-			this.parentNode.append(node);
+		this.frag[length - 1].after(node);
+
+		const placeholder = this[$placeholder];
+		if (this.frag[0] === placeholder) {
+			this.frag.splice(0, 1);
+			placeholder.remove();
 		}
 
 		setFakeParent(node, this);
@@ -74,11 +92,20 @@ const elementPatches = {
 	},
 };
 
+const $originalParent = Symbol();
+
 const frag = {
 	inserted(element) {
 		const nodes = Array.from(element.childNodes);
 
 		const {parentNode: parent} = element;
+
+		element[$originalParent] = parent;
+		const placeholder = document.createComment('');
+		element[$placeholder] = placeholder;
+		if (nodes.length === 0) {
+			nodes.push(placeholder);
+		}
 
 		const fragment = document.createDocumentFragment();
 		fragment.append(...nodes);
@@ -93,6 +120,8 @@ const frag = {
 		nodes.forEach(node => setFakeParent(node, element));
 
 		// Handle v-html
+
+		// Convert to setter in elementPatches?
 		Object.defineProperty(element, 'innerHTML', {
 			set(htmlString) {
 				const domify = document.createElement('div');
@@ -109,6 +138,20 @@ const frag = {
 		});
 
 		Object.assign(element, elementPatches);
+	},
+
+	unbind(element) {
+		if (element.frag.length > 0) { // Should always be true...
+			element[$fakeParent] = undefined;
+			const nodes = element.frag.splice(0);
+			element.append(...nodes);
+			nodes.forEach(node => {
+				node[$fakeParent] = undefined;
+			});
+
+			element[$placeholder].remove();
+			element.frag = undefined;
+		}
 	},
 };
 

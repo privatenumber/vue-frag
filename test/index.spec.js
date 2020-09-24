@@ -213,11 +213,7 @@ describe('Reactivity', () => {
 
 	test('v-for template', async () => {
 		const TestComponent = {
-			template: `
-				<span v-frag>
-					<template v-for="i in num">{{ i }}</template>
-				</span>
-			`,
+			template: '<span v-frag><template v-for="i in num">{{ i }}</template></span>',
 			directives: {
 				frag,
 			},
@@ -225,11 +221,7 @@ describe('Reactivity', () => {
 		};
 
 		const usage = {
-			template: `
-				<div>
-					<test-component :num="num" />
-				</div>
-			`,
+			template: '<div><test-component :num="num" /></div>',
 			components: {
 				TestComponent,
 			},
@@ -243,7 +235,7 @@ describe('Reactivity', () => {
 		const tpl = number => `<div>${number}</div>`;
 
 		const wrapper = mount(usage);
-		expect(wrapper.html()).toBe(tpl(''));
+		expect(wrapper.html()).toBe(tpl('\n  <!---->\n'));
 
 		wrapper.setData({num: 1});
 		await wrapper.vm.$nextTick();
@@ -479,6 +471,119 @@ test('Parent multiple v-if', async () => {
 	await wrapper.vm.$nextTick();
 
 	expect(wrapper.html()).toBe('<article>\n  <div>Hello world A</div>\n  <!---->\n  <div>Hello world C</div>\n</article>');
+});
+
+test('Parent nested v-if empty', async () => {
+	const ChildComp = {
+		template: '<article v-frag></article>',
+
+		directives: {
+			frag,
+		},
+	};
+
+	const ParentComp = {
+		template: '<section v-frag>Parent <child-comp v-if="shown" ref="child" /><div v-else>No Child</div></section>',
+
+		directives: {
+			frag,
+		},
+
+		components: {
+			ChildComp,
+		},
+
+		data() {
+			return {
+				shown: true,
+			};
+		},
+	};
+
+	const attachTo = document.createElement('header');
+	document.body.append(attachTo);
+	const $parent = mount(ParentComp, {attachTo});
+
+	expect(document.body.innerHTML).toBe('Parent <!---->');
+
+	$parent.setData({shown: false});
+	await $parent.vm.$nextTick();
+
+	expect(document.body.innerHTML).toBe('Parent <div>No Child</div>');
+
+	$parent.setData({shown: true});
+	await $parent.vm.$nextTick();
+
+	expect(document.body.innerHTML).toBe('Parent <!---->');
+
+	$parent.destroy();
+	attachTo.remove();
+
+	expect(document.body.innerHTML).toBe('');
+});
+
+test('Parent nested v-if', async () => {
+	const ChildComp = {
+		template: '<div v-frag><div v-if="shown">Child</div></div>',
+
+		directives: {
+			frag,
+		},
+
+		data() {
+			return {
+				shown: true,
+			};
+		},
+	};
+
+	const ParentComp = {
+		template: '<div v-frag>Parent <child-comp v-if="shown" ref="child" /></div>',
+
+		directives: {
+			frag,
+		},
+
+		components: {
+			ChildComp,
+		},
+
+		data() {
+			return {
+				shown: true,
+			};
+		},
+	};
+
+	const attachTo = document.createElement('div');
+	document.body.append(attachTo);
+	const $parent = mount(ParentComp, {attachTo});
+
+	expect(document.body.innerHTML).toBe('Parent <div>Child</div>');
+
+	const $child = $parent.findComponent({ref: 'child'});
+
+	$child.setData({shown: false});
+	await $child.vm.$nextTick();
+
+	$parent.setData({shown: false});
+	await $parent.vm.$nextTick();
+
+	expect(document.body.innerHTML).toBe('Parent <!---->');
+
+	$child.setData({shown: true});
+	await $child.vm.$nextTick();
+
+	expect(document.body.innerHTML).toBe('Parent <!---->');
+
+	$parent.setData({shown: true});
+	await $parent.vm.$nextTick();
+
+	expect(document.body.innerHTML).toBe('Parent <div>Child</div>');
+
+	$parent.destroy();
+
+	expect(document.body.innerHTML).toBe('');
 });
 
 test('v-html', async () => {
