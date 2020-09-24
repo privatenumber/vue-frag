@@ -21,7 +21,7 @@ test('Basic usage', () => {
 	expect(wrapper.html().trim()).toBe(`<div>${string}</div>`);
 });
 
-test('Root frag', () => {
+test('Frag on app root', () => {
 	const string = `Hello world ${Date.now()}`;
 	const usage = {
 		template: `<article v-frag>${string}</article>`,
@@ -32,8 +32,52 @@ test('Root frag', () => {
 
 	const attachTo = document.createElement('div');
 	document.body.append(attachTo);
-	mount(usage, {attachTo});
+	const wrapper = mount(usage, {attachTo});
 	expect(document.body.innerHTML.trim()).toBe(string);
+	wrapper.destroy();
+	attachTo.remove();
+});
+
+test('Nested frags', async () => {
+	const ChildComp = {
+		template: '<div v-frag>{{ depth }} <child-comp v-if="depth" :depth="depth - 1" /></div>',
+		props: {
+			depth: {
+				type: Number,
+				default: 5,
+			},
+		},
+		directives: {
+			frag,
+		},
+		beforeCreate() {
+			this.$options.components.ChildComp = ChildComp;
+		},
+	};
+
+	const ParentComp = {
+		template: '<div v-frag>Parent <child-comp /></div>',
+		directives: {
+			frag,
+		},
+		components: {
+			ChildComp,
+		},
+	};
+
+	const usage = {
+		template: '<parent-comp />',
+		components: {
+			ParentComp,
+		},
+	};
+
+	const attachTo = document.createElement('div');
+	document.body.append(attachTo);
+
+	const wrapper = mount(usage, {attachTo});
+	expect(document.body.innerHTML).toBe('Parent 5 4 3 2 1 0 <!---->');
+	wrapper.destroy();
 	attachTo.remove();
 });
 
