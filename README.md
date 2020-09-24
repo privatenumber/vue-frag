@@ -56,7 +56,7 @@ export default {
 
 ## 👨🏻‍🏫 Examples
 
-#### Returning multiple root nodes
+#### Returning multiple root nodes <a href="https://codepen.io/hirokiosame/pen/PoNVZbV"><img src="https://img.shields.io/badge/codepen.io-demo-blue" valign="bottom"></a>
 ```vue
 <template>
     <div v-frag> <!-- This element will be unwrapped -->
