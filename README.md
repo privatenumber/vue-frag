@@ -17,7 +17,7 @@ Vue 2 fragment directive to return multiple root elements
 - **✅ Multiple root nodes** Without creating a functional component!
 - **🔥 SSR** Unwraps the root element on client-side post-hydration!
 - **⚡️ Directives** Supports `v-if`, `v-for`, and `v-html`!
-- **🐥 Tiny** Only `696 B`!
+- **🐥 Tiny** Only `816 B`!
 
 ## 🚀 Install
 ```sh
@@ -56,7 +56,7 @@ export default {
 
 ## 👨🏻‍🏫 Examples
 
-#### Returning multiple root nodes
+#### Returning multiple root nodes <a href="https://codepen.io/hirokiosame/pen/PoNVZbV"><img src="https://img.shields.io/badge/codepen.io-demo-blue" valign="bottom"></a>
 ```vue
 <template>
     <div v-frag> <!-- This element will be unwrapped -->
