@@ -522,6 +522,60 @@ test('Parent nested v-if empty', async () => {
 	expect(document.body.innerHTML).toBe('');
 });
 
+test('Parent nested v-if empty', async () => {
+	const ChildComp = {
+		template: '<article v-frag>A</article>',
+
+		directives: {
+			frag,
+		},
+	};
+
+	const ParentComp = {
+		template: '<section v-frag><child-comp v-if="shown" /></section>',
+
+		directives: {
+			frag,
+		},
+
+		components: {
+			ChildComp,
+		},
+
+		data() {
+			return {
+				shown: false,
+			};
+		},
+	};
+
+	const attachTo = document.createElement('header');
+	document.body.append(attachTo);
+	const wrapper = mount(ParentComp, {attachTo});
+
+	expect(document.body.innerHTML).toBe('<!---->');
+
+	wrapper.setData({shown: true});
+	await wrapper.vm.$nextTick();
+
+	expect(document.body.innerHTML).toBe('A');
+
+	wrapper.setData({shown: false});
+	await wrapper.vm.$nextTick();
+
+	expect(document.body.innerHTML).toBe('<!---->');
+
+	wrapper.setData({shown: true});
+	await wrapper.vm.$nextTick();
+
+	expect(document.body.innerHTML).toBe('A');
+
+	wrapper.destroy();
+	attachTo.remove();
+
+	expect(document.body.innerHTML).toBe('');
+});
+
 test('Parent nested v-if', async () => {
 	const ChildComp = {
 		template: '<div v-frag><div v-if="shown">Child</div></div>',
