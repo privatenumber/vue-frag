@@ -522,7 +522,7 @@ test('Parent nested v-if empty', async () => {
 	expect(document.body.innerHTML).toBe('');
 });
 
-test('Parent nested v-if empty', async () => {
+test('Parent nested v-if text', async () => {
 	const ChildComp = {
 		template: '<article v-frag>A</article>',
 
@@ -616,9 +616,6 @@ test('Parent nested v-if', async () => {
 	expect(document.body.innerHTML).toBe('Parent <div>Child</div>');
 
 	const $child = $parent.findComponent({ref: 'child'});
-
-	$child.setData({shown: false});
-	await $child.vm.$nextTick();
 
 	$parent.setData({shown: false});
 	await $parent.vm.$nextTick();
