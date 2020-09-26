@@ -38,11 +38,16 @@ function insertBefore(newNode, refNode) {
 	setFakeParent(newNode, this);
 }
 
-const $fakeChildren = Symbol();
-const parentPatches = {
-	insertBefore,
-	removeChild(node) {
-		const fc = this[$fakeChildren];
+function removeChild(node) {
+	if (this.frag) {
+		const idx = this.frag.indexOf(node);
+		if (idx > -1) {
+			this.frag.splice(idx, 1);
+		}
+	}
+
+	const fc = this[$fakeChildren];
+	if (fc) {
 		const hasFakeChildren = fc.get(node);
 		if (hasFakeChildren) {
 			resetChildren(hasFakeChildren, node);
@@ -50,9 +55,15 @@ const parentPatches = {
 			node[$fakeParent] = undefined;
 			return;
 		}
+	}
 
-		node.remove();
-	},
+	node.remove();
+}
+
+const $fakeChildren = Symbol();
+const parentPatches = {
+	insertBefore,
+	removeChild,
 };
 
 function patchParent(parent, child, nodes) {
@@ -81,14 +92,7 @@ const elementPatches = {
 		removed.forEach(element => element.remove());
 	},
 
-	removeChild(node) {
-		const idx = this.frag.indexOf(node);
-		if (idx > -1) {
-			this.frag.splice(idx, 1);
-		}
-
-		node.remove();
-	},
+	removeChild,
 
 	appendChild(node) {
 		const {length} = this.frag;
