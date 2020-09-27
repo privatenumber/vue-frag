@@ -1,12 +1,13 @@
 {
   "name": "vue-frag",
   "version": "0.0.0-semantic-release",
-  "description": "Vue fragment directive to unwrap root elements",
+  "description": "Vue 2 fragment directive to return multiple root elements",
   "keywords": [
     "vue",
     "fragment",
     "directive",
-    "ssr"
+    "ssr",
+    "multiple root nodes"
   ],
   "license": "MIT",
   "repository": "privatenumber/vue-frag",
