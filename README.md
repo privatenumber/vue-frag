@@ -20,6 +20,8 @@ Use [Vue 3's Fragment feature](https://v3.vuejs.org/guide/migration/fragments.ht
 - **⚡️ Directives** Supports `v-if`, `v-for`, and `v-html`!
 - **🐥 Tiny** Only `816 B`!
 
+For a detailed explanation, checkout the [FAQ](#when-would-i-want-to-return-multiple-root-nodes) below.
+
 ## 🚀 Install
 ```sh
 npm i vue-frag
