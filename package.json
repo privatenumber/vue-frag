@@ -29,7 +29,10 @@
     }
   },
   "lint-staged": {
-    "*.js": "xo"
+    "*.js": [
+      "xo",
+      "jest --bail --findRelatedTests"
+    ]
   },
   "devDependencies": {
     "@babel/preset-env": "^7.11.5",

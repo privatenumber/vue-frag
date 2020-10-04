@@ -2,7 +2,7 @@ module.exports = {
 	presets: [
 		['@babel/preset-env', {
 			loose: true,
-		}]
+		}],
 	],
 	env: {
 		test: {
@@ -11,7 +11,7 @@ module.exports = {
 					useBuiltIns: 'usage',
 					corejs: 3,
 				}],
-			]
-		}
-	}
+			],
+		},
+	},
 };
