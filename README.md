@@ -4,7 +4,7 @@ Use [Vue 3's Fragment feature](https://v3.vuejs.org/guide/migration/fragments.ht
 
 ```vue
 <template>
-    <div v-frag> <-- This root element is removed on render!
+    <div v-frag> 👈  This root element is removed on render!
 
         <li>Element 1</li>
         <li>Element 2</li>
