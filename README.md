@@ -127,3 +127,11 @@ Vue associates vNodes with specific DOM references so once a component has mount
 
 ### Does `v-show` work?
 Unfortunately not. `v-show` works by setting `style="display: none"` on the root element of the target component, and with `vue-frag` unwrapping and removing the root element, there would be no grouping-element to apply the `display: none` to. If the fragment returned elements, it's possible to apply it to each child-node, but it's possible for them to be text-nodes which cannot be styled.
+
+
+## 👨‍👩‍👧 Related
+- [vue-subslot](https://github.com/privatenumber/vue-subslot) - 💍 pick out specific elements from component `<slot>`s
+- [vue-vnode-syringe](https://github.com/privatenumber/vue-vnode-syringe) - 🧬 Add attributes and event-listeners to `<slot>` content 💉
+- [vue-proxi](https://github.com/privatenumber/vue-proxi) - 💠 Tiny proxy component
+- [vue-pseudo-window](https://github.com/privatenumber/vue-pseudo-window) - 🖼 Declaratively interface window/document in your Vue template
+- [vue-v](https://github.com/privatenumber/vue-v) - render vNodes via component template
