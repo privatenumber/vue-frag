@@ -15,6 +15,8 @@ Use [Vue 3's Fragment feature](https://v3.vuejs.org/guide/migration/fragments.ht
 
 👉 Try out a [demo in this CodePen](https://codepen.io/hirokiosame/pen/PoNVZbV)!
 
+<sub>If you like this project, please star it & [follow me](https://github.com/privatenumber) to see what other cool projects I'm working on! ❤️</sub>
+
 ## 🙋‍♂️ Why?
 - **✅ Multiple root nodes** Without creating a functional component!
 - **🔥 SSR** Unwraps the root element on client-side post-hydration!
