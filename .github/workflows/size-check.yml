@@ -1,0 +1,17 @@
+name: Size Check
+
+on:
+  pull_request:
+    branches: [master, develop]
+
+jobs:
+  size-check:
+    name: Size Check
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - uses: privatenumber/export-size-action#upgrade-dependencies
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
