@@ -13,5 +13,5 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - uses: privatenumber/export-size-action@upgrade-dependencies
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
