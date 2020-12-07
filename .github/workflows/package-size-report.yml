@@ -1,0 +1,19 @@
+name: Package Size Report
+
+on:
+  pull_request:
+    branches: [ master, develop ]
+
+jobs:
+  pkg-size-report:
+    name: Package Size Report
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Package size report
+        uses: privatenumber/pkg-size-action@develop
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
