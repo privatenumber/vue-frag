@@ -124,6 +124,9 @@ Related VueJS Issues / Stackoverflow Qs:
 - [vuejs/vue #7606](https://github.com/vuejs/vue/issues/7606)
 - [Stackoverflow: A way to render multiple root elements in VueJS?](https://stackoverflow.com/questions/47511674/a-way-to-render-multiple-root-elements-on-vuejs-with-v-for-directive)
 
+### How is this different from [vue-fragment](https://www.npmjs.com/package/vue-fragment)?
+They are both designed to do the same thing. However, [vue-fragment](https://github.com/Thunberg087/vue-fragment) is a component and vue-frag is a directive. I made vue-frag when I saw vue-fragment didn't have any tests to ensure correct behavior, had a lot of unattended issues, and didn't seem actively maintained. In terms of size, they are both small but vue-frag is slightly smaller (`993B` vs `798B`).
+
 
 ### How does this work?
 Vue associates vNodes with specific DOM references so once a component has mounted, the DOM nodes can be moved around and Vue will still be able to mutate them by reference. The Frag directive simply replaces the root element of a component in the DOM with it's children upon DOM insertion, and monkey-patches native properties like `parentNode` on the children to make Vue think they're still using the component root element.
