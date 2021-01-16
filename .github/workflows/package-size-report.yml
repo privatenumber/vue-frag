@@ -17,5 +17,3 @@ jobs:
         uses: privatenumber/pkg-size-action@develop
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          display-size: uncompressed, gzip
