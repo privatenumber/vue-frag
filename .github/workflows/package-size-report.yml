@@ -22,4 +22,4 @@ jobs:
           display-size: uncompressed, gzip
 
       - name: Comment
-        uses: ./comment-report.js
+        uses: ./.github/comment-report.js
