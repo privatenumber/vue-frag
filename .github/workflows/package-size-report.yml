@@ -22,4 +22,4 @@ jobs:
           display-size: uncompressed, gzip
 
       - name: Comment
-        run: node ./.github/comment-report.js
+        run: ls; node .github/comment-report.js
