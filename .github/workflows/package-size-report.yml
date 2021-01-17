@@ -14,8 +14,12 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Package size report
+        id: pkg-size-report
         uses: privatenumber/pkg-size-action@develop
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           display-size: uncompressed, gzip
+
+      - name: Comment
+        uses: ./comment-report.js
