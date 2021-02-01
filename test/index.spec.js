@@ -674,3 +674,48 @@ test('v-html', async () => {
 	await wrapper.vm.$nextTick();
 	expect(wrapper.html()).toBe('<article>\n  <div>2</div>\n  <div>3</div>\n</article>');
 });
+
+// #17
+test('child order change', async () => {
+	const TestComponent = {
+		template: '<div v-frag>{{ num }}</div>',
+		directives: {
+			frag,
+		},
+		props: ['num'],
+	};
+
+	const usage = {
+		template: '<div><test-component v-for="i in numbers" :key="i" :num="i" /></div>',
+		components: {
+			TestComponent,
+		},
+		data() {
+			return {
+				numbers: [1, 2, 3],
+			};
+		},
+		methods: {
+			slice() {
+				this.numbers.splice(1, 1);
+				this.numbers.reverse();
+			},
+		},
+	};
+
+	const tpl = number => `<div>${number}</div>`;
+
+	const wrapper = mount(usage);
+
+	expect(wrapper.html()).toBe(tpl(123));
+
+	wrapper.vm.slice();
+	await wrapper.vm.$nextTick();
+
+	expect(wrapper.html()).toBe(tpl(31));
+
+	wrapper.vm.slice();
+	await wrapper.vm.$nextTick();
+
+	expect(wrapper.html()).toBe(tpl(3));
+});
