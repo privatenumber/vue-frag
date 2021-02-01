@@ -15,6 +15,8 @@ Use [Vue 3's Fragment feature](https://v3.vuejs.org/guide/migration/fragments.ht
 
 👉 Try out a [demo in this CodePen](https://codepen.io/hirokiosame/pen/PoNVZbV)!
 
+<sub>If you like this project, please star it & [follow me](https://github.com/privatenumber) to see what other cool projects I'm working on! ❤️</sub>
+
 ## 🙋‍♂️ Why?
 - **✅ Multiple root nodes** Without creating a functional component!
 - **🔥 SSR** Unwraps the root element on client-side post-hydration!
@@ -121,6 +123,9 @@ Related VueJS Issues / Stackoverflow Qs:
 - [vuejs/vue #7088](https://github.com/vuejs/vue/issues/7088)
 - [vuejs/vue #7606](https://github.com/vuejs/vue/issues/7606)
 - [Stackoverflow: A way to render multiple root elements in VueJS?](https://stackoverflow.com/questions/47511674/a-way-to-render-multiple-root-elements-on-vuejs-with-v-for-directive)
+
+### How is this different from [vue-fragment](https://www.npmjs.com/package/vue-fragment)?
+They are both designed to do the same thing. However, [vue-fragment](https://github.com/Thunberg087/vue-fragment) is a component and vue-frag is a directive. I made vue-frag when I saw vue-fragment didn't have any tests to ensure correct behavior, had a lot of unattended issues, and didn't seem actively maintained. In terms of size, they are both small but vue-frag is slightly smaller (`993B` vs `798B`).
 
 
 ### How does this work?

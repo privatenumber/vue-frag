@@ -20,10 +20,12 @@ const resetChildren = (frag, moveTo) => {
 };
 
 function insertBefore(newNode, refNode) {
+	const newNodes = newNode.frag || [newNode];
+
 	if (this.frag) {
 		const idx = this.frag.indexOf(refNode);
 		if (idx > -1) {
-			this.frag.splice(idx, 0, newNode);
+			this.frag.splice(idx, 0, ...newNodes);
 		}
 	}
 
@@ -34,8 +36,13 @@ function insertBefore(newNode, refNode) {
 		}
 	}
 
-	refNode.before(newNode);
-	setFakeParent(newNode, this);
+	if (refNode) {
+		refNode.before(...newNodes);
+	} else {
+		this.append(...newNodes);
+	}
+
+	newNodes.forEach(newNode => setFakeParent(newNode, this));
 }
 
 function removeChild(node) {
