@@ -696,7 +696,7 @@ test('child order change', async () => {
 			};
 		},
 		methods: {
-			slice() {
+			spliceAndReverse() {
 				this.numbers.splice(1, 1);
 				this.numbers.reverse();
 			},
@@ -709,12 +709,12 @@ test('child order change', async () => {
 
 	expect(wrapper.html()).toBe(tpl(123));
 
-	wrapper.vm.slice();
+	wrapper.vm.spliceAndReverse();
 	await wrapper.vm.$nextTick();
 
 	expect(wrapper.html()).toBe(tpl(31));
 
-	wrapper.vm.slice();
+	wrapper.vm.spliceAndReverse();
 	await wrapper.vm.$nextTick();
 
 	expect(wrapper.html()).toBe(tpl(3));
