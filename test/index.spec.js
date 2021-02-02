@@ -719,3 +719,47 @@ test('child order change', async () => {
 
 	expect(wrapper.html()).toBe(tpl(3));
 });
+
+// #21
+test('v-if slot', async () => {
+	const TestComponent = {
+		template: '<div v-frag><slot /></div>',
+		directives: {
+			frag,
+		},
+	};
+
+	const usage = {
+		template: `
+			<div class="wrapper">
+				<test-component><div v-if="show">A</div></test-component>
+			</div>
+		`,
+		components: {
+			TestComponent,
+		},
+		data() {
+			return {
+				show: false,
+			};
+		},
+	};
+
+	const empty = '<div class="wrapper">\n  <!---->\n</div>';
+	const ifTrue = '<div class="wrapper">\n  <div>A</div>\n</div>';
+
+	const wrapper = mount(usage);
+	expect(wrapper.html()).toBe(empty);
+
+	wrapper.setData({show: true});
+	await wrapper.vm.$nextTick();
+	expect(wrapper.html()).toBe(ifTrue);
+
+	wrapper.setData({show: false});
+	await wrapper.vm.$nextTick();
+	expect(wrapper.html()).toBe(empty);
+
+	wrapper.setData({show: true});
+	await wrapper.vm.$nextTick();
+	expect(wrapper.html()).toBe(ifTrue);
+});
