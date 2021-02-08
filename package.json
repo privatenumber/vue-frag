@@ -54,6 +54,12 @@
     "vue-template-compiler": "^2.6.12"
   },
   "eslintConfig": {
-    "extends": "@pvtnbr/eslint-config-base"
+    "extends": "@pvtnbr/eslint-config-base",
+    "env": {
+      "browser": true
+    },
+    "rules": {
+      "symbol-description": "off"
+    }
   }
 }
