@@ -1,4 +1,6 @@
 const $fakeParent = Symbol();
+const $fakeChildren = Symbol();
+const $placeholder = Symbol();
 
 function setFakeParent(node, fakeParent) {
 	if (!node[$fakeParent]) {
@@ -74,7 +76,6 @@ function removeChild(node) {
 	node.remove();
 }
 
-const $fakeChildren = Symbol();
 const parentPatches = {
 	insertBefore,
 	removeChild,
@@ -88,8 +89,6 @@ function patchParent(parent, child, nodes) {
 
 	parent[$fakeChildren].set(child, nodes);
 }
-
-const $placeholder = Symbol();
 
 const elementPatches = {
 	insertBefore,
