@@ -56,5 +56,14 @@
 		"vue": "^2.6.12",
 		"vue-server-renderer": "^2.6.12",
 		"vue-template-compiler": "^2.6.12"
+	},
+	"eslintConfig": {
+		"extends": "@pvtnbr/eslint-config-base",
+		"env": {
+			"browser": true
+		},
+		"rules": {
+			"symbol-description": "off"
+		}
 	}
 }
