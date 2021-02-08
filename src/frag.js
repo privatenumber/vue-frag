@@ -164,7 +164,6 @@ const frag = {
 		});
 
 		Object.assign(element, elementPatches);
-		console.log('test');
 	},
 
 	unbind(element) {
