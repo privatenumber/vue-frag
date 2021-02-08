@@ -15,11 +15,8 @@ jobs:
 
       - name: Package size report
         id: pkg-size-report
-        uses: privatenumber/pkg-size-action@develop
+        uses: privatenumber/pkg-size-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           display-size: uncompressed, gzip
-
-      - name: Comment
-        run: ls -aR
