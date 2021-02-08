@@ -49,7 +49,14 @@ function removeChild(node) {
 	if (this.frag) {
 		const idx = this.frag.indexOf(node);
 		if (idx > -1) {
-			this.frag.splice(idx, 1);
+			const spliceArgs = [idx, 1];
+			if (this.frag.length === 1) {
+				const placeholder = this[$placeholder];
+				this.frag[0].before(placeholder);
+				spliceArgs.push(placeholder);
+			}
+
+			this.frag.splice(...spliceArgs);
 		}
 	}
 
