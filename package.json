@@ -1,55 +1,59 @@
 {
-  "name": "vue-frag",
-  "version": "0.0.0-semantic-release",
-  "description": "Vue 2 fragment directive to return multiple root elements",
-  "keywords": [
-    "vue",
-    "fragment",
-    "directive",
-    "ssr",
-    "multiple root nodes"
-  ],
-  "license": "MIT",
-  "repository": "privatenumber/vue-frag",
-  "author": "Hiroki Osame <hiroki.osame@gmail.com>",
-  "files": [
-    "dist"
-  ],
-  "main": "dist/frag.cjs.js",
-  "module": "dist/frag.esm.js",
-  "unpkg": "dist/frag.js",
-  "scripts": {
-    "build": "rollup -c --environment NODE_ENV:production",
-    "test": "jest",
-    "lint": "xo"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
-  "lint-staged": {
-    "*.js": [
-      "xo --fix",
-      "jest --bail --findRelatedTests"
-    ]
-  },
-  "devDependencies": {
-    "@babel/preset-env": "^7.11.5",
-    "@vue/server-test-utils": "^1.0.5",
-    "@vue/test-utils": "^1.0.5",
-    "babel-jest": "^26.3.0",
-    "core-js": "^3.6.5",
-    "husky": "^4.2.5",
-    "jest": "^26.4.2",
-    "lint-staged": "^10.2.13",
-    "rollup": "^2.26.11",
-    "rollup-plugin-babel": "^4.4.0",
-    "rollup-plugin-filesize": "^9.0.2",
-    "rollup-plugin-terser": "^7.0.2",
-    "vue": "^2.6.12",
-    "vue-server-renderer": "^2.6.12",
-    "vue-template-compiler": "^2.6.12",
-    "xo": "^0.33.0"
-  }
+	"name": "vue-frag",
+	"version": "0.0.0-semantic-release",
+	"description": "Vue 2 fragment directive to return multiple root elements",
+	"keywords": [
+		"vue",
+		"fragment",
+		"directive",
+		"ssr",
+		"multiple root nodes"
+	],
+	"license": "MIT",
+	"repository": "privatenumber/vue-frag",
+	"funding": "https://github.com/privatenumber/vue-frag?sponsor=1",
+	"author": {
+		"name": "Hiroki Osame",
+		"email": "hiroki.osame@gmail.com"
+	},
+	"files": [
+		"dist"
+	],
+	"main": "dist/frag.cjs.js",
+	"module": "dist/frag.esm.js",
+	"unpkg": "dist/frag.js",
+	"scripts": {
+		"build": "rollup -c --environment NODE_ENV:production",
+		"test": "jest",
+		"lint": "xo"
+	},
+	"husky": {
+		"hooks": {
+			"pre-commit": "lint-staged"
+		}
+	},
+	"lint-staged": {
+		"*.js": [
+			"xo --fix",
+			"jest --bail --findRelatedTests"
+		]
+	},
+	"devDependencies": {
+		"@babel/preset-env": "^7.11.5",
+		"@vue/server-test-utils": "^1.0.5",
+		"@vue/test-utils": "^1.0.5",
+		"babel-jest": "^26.3.0",
+		"core-js": "^3.6.5",
+		"husky": "^4.2.5",
+		"jest": "^26.4.2",
+		"lint-staged": "^10.2.13",
+		"rollup": "^2.26.11",
+		"rollup-plugin-babel": "^4.4.0",
+		"rollup-plugin-filesize": "^9.0.2",
+		"rollup-plugin-terser": "^7.0.2",
+		"vue": "^2.6.12",
+		"vue-server-renderer": "^2.6.12",
+		"vue-template-compiler": "^2.6.12",
+		"xo": "^0.33.0"
+	}
 }
