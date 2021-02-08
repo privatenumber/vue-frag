@@ -154,7 +154,7 @@ const frag = {
 				domify.innerHTML = htmlString;
 
 				const oldNodesIdx = element.frag.length;
-				// eslint-disable-next-line unicorn/prefer-node-append
+				// eslint-disable-next-line unicorn/prefer-dom-node-append
 				Array.from(domify.childNodes).forEach(node => element.appendChild(node));
 				domify.append(...element.frag.splice(0, oldNodesIdx));
 			},
