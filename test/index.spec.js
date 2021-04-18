@@ -1,5 +1,5 @@
 import frag from 'vue-frag';
-import {mount} from '@vue/test-utils';
+import { mount } from '@vue/test-utils';
 
 test('Basic usage', () => {
 	const string = `Hello world ${Date.now()}`;
@@ -32,7 +32,7 @@ test('Frag on app root', () => {
 
 	const attachTo = document.createElement('div');
 	document.body.append(attachTo);
-	const wrapper = mount(usage, {attachTo});
+	const wrapper = mount(usage, { attachTo });
 	expect(document.body.innerHTML.trim()).toBe(string);
 	wrapper.destroy();
 	attachTo.remove();
@@ -75,7 +75,7 @@ test('Nested frags', async () => {
 	const attachTo = document.createElement('div');
 	document.body.append(attachTo);
 
-	const wrapper = mount(usage, {attachTo});
+	const wrapper = mount(usage, { attachTo });
 	expect(document.body.innerHTML).toBe('Parent 5 4 3 2 1 0 <!---->');
 	wrapper.destroy();
 	attachTo.remove();
@@ -109,7 +109,7 @@ describe('Reactivity', () => {
 
 		const wrapper = mount(usage);
 		const number = Date.now();
-		wrapper.setData({number});
+		wrapper.setData({ number });
 		await wrapper.vm.$nextTick();
 
 		expect(wrapper.html()).toBe(`<article>Hello world ${number}</article>`);
@@ -150,15 +150,15 @@ describe('Reactivity', () => {
 		const wrapper = mount(usage);
 		expect(wrapper.html()).toBe(empty);
 
-		wrapper.setData({show: true});
+		wrapper.setData({ show: true });
 		await wrapper.vm.$nextTick();
 		expect(wrapper.html()).toBe(ifTrue);
 
-		wrapper.setData({show: false});
+		wrapper.setData({ show: false });
 		await wrapper.vm.$nextTick();
 		expect(wrapper.html()).toBe(empty);
 
-		wrapper.setData({show: true});
+		wrapper.setData({ show: true });
 		await wrapper.vm.$nextTick();
 		expect(wrapper.html()).toBe(ifTrue);
 	});
@@ -198,15 +198,15 @@ describe('Reactivity', () => {
 		const wrapper = mount(usage);
 		expect(wrapper.html()).toBe(empty);
 
-		wrapper.setData({show: true});
+		wrapper.setData({ show: true });
 		await wrapper.vm.$nextTick();
 		expect(wrapper.html()).toBe(ifTrue);
 
-		wrapper.setData({show: false});
+		wrapper.setData({ show: false });
 		await wrapper.vm.$nextTick();
 		expect(wrapper.html()).toBe(empty);
 
-		wrapper.setData({show: true});
+		wrapper.setData({ show: true });
 		await wrapper.vm.$nextTick();
 		expect(wrapper.html()).toBe(ifTrue);
 	});
@@ -237,15 +237,15 @@ describe('Reactivity', () => {
 		const wrapper = mount(usage);
 		expect(wrapper.html()).toBe(tpl('\n  <!---->\n'));
 
-		wrapper.setData({num: 1});
+		wrapper.setData({ num: 1 });
 		await wrapper.vm.$nextTick();
 		expect(wrapper.html()).toBe(tpl('1'));
 
-		wrapper.setData({num: 2});
+		wrapper.setData({ num: 2 });
 		await wrapper.vm.$nextTick();
 		expect(wrapper.html()).toBe(tpl('12'));
 
-		wrapper.setData({num: 3});
+		wrapper.setData({ num: 3 });
 		await wrapper.vm.$nextTick();
 		expect(wrapper.html()).toBe(tpl('123'));
 	});
@@ -285,11 +285,11 @@ describe('Reactivity', () => {
 		await wrapper.vm.$nextTick();
 		expect(wrapper.html()).toBe(tpl([1]));
 
-		wrapper.setData({num: 2});
+		wrapper.setData({ num: 2 });
 		await wrapper.vm.$nextTick();
 		expect(wrapper.html()).toBe(tpl([1, 2]));
 
-		wrapper.setData({num: 3});
+		wrapper.setData({ num: 3 });
 		await wrapper.vm.$nextTick();
 		expect(wrapper.html()).toBe(tpl([1, 2, 3]));
 	});
@@ -332,15 +332,15 @@ describe('Reactivity', () => {
 		const wrapper = mount(usage);
 		expect(wrapper.html()).toBe(empty);
 
-		wrapper.setData({show: true});
+		wrapper.setData({ show: true });
 		await wrapper.vm.$nextTick();
 		expect(wrapper.html()).toBe(ifTrue);
 
-		wrapper.setData({show: false});
+		wrapper.setData({ show: false });
 		await wrapper.vm.$nextTick();
 		expect(wrapper.html()).toBe(empty);
 
-		wrapper.setData({show: true});
+		wrapper.setData({ show: true });
 		await wrapper.vm.$nextTick();
 		expect(wrapper.html()).toBe(ifTrue);
 	});
@@ -386,11 +386,11 @@ describe('Reactivity', () => {
 		await wrapper.vm.$nextTick();
 		expect(wrapper.html()).toBe(tpl(['A 1', 'B 1', 'C 1']));
 
-		wrapper.setData({num: 2});
+		wrapper.setData({ num: 2 });
 		await wrapper.vm.$nextTick();
 		expect(wrapper.html()).toBe(tpl(['A 1', 'A 2', 'B 1', 'B 2', 'C 1', 'C 2']));
 
-		wrapper.setData({num: 3});
+		wrapper.setData({ num: 3 });
 		await wrapper.vm.$nextTick();
 		expect(wrapper.html()).toBe(tpl(['A 1', 'A 2', 'A 3', 'B 1', 'B 2', 'B 3', 'C 1', 'C 2', 'C 3']));
 	});
@@ -421,12 +421,12 @@ test('Parent v-if', async () => {
 	const wrapper = mount(usage);
 	expect(wrapper.html()).toBe('<article>Hello world</article>');
 
-	wrapper.setData({show: false});
+	wrapper.setData({ show: false });
 	await wrapper.vm.$nextTick();
 
 	expect(wrapper.html()).toBe('<article>\n  <!---->\n</article>');
 
-	wrapper.setData({show: true});
+	wrapper.setData({ show: true });
 	await wrapper.vm.$nextTick();
 
 	expect(wrapper.html()).toBe('<article>Hello world</article>');
@@ -462,12 +462,12 @@ test('Parent multiple v-if', async () => {
 	const wrapper = mount(usage);
 	expect(wrapper.html()).toBe('<article>\n  <div>Hello world A</div>\n  <!---->\n  <div>Hello world C</div>\n</article>');
 
-	wrapper.setData({show: false});
+	wrapper.setData({ show: false });
 	await wrapper.vm.$nextTick();
 
 	expect(wrapper.html()).toBe('<article>\n  <!---->\n  <div>Hello world B</div>\n  <!---->\n</article>');
 
-	wrapper.setData({show: true});
+	wrapper.setData({ show: true });
 	await wrapper.vm.$nextTick();
 
 	expect(wrapper.html()).toBe('<article>\n  <div>Hello world A</div>\n  <!---->\n  <div>Hello world C</div>\n</article>');
@@ -502,16 +502,16 @@ test('Parent nested v-if empty', async () => {
 
 	const attachTo = document.createElement('header');
 	document.body.append(attachTo);
-	const $parent = mount(ParentComp, {attachTo});
+	const $parent = mount(ParentComp, { attachTo });
 
 	expect(document.body.innerHTML).toBe('Parent <!---->');
 
-	$parent.setData({shown: false});
+	$parent.setData({ shown: false });
 	await $parent.vm.$nextTick();
 
 	expect(document.body.innerHTML).toBe('Parent <div>No Child</div>');
 
-	$parent.setData({shown: true});
+	$parent.setData({ shown: true });
 	await $parent.vm.$nextTick();
 
 	expect(document.body.innerHTML).toBe('Parent <!---->');
@@ -551,21 +551,21 @@ test('Parent nested v-if text', async () => {
 
 	const attachTo = document.createElement('header');
 	document.body.append(attachTo);
-	const wrapper = mount(ParentComp, {attachTo});
+	const wrapper = mount(ParentComp, { attachTo });
 
 	expect(document.body.innerHTML).toBe('<!---->');
 
-	wrapper.setData({shown: true});
+	wrapper.setData({ shown: true });
 	await wrapper.vm.$nextTick();
 
 	expect(document.body.innerHTML).toBe('A');
 
-	wrapper.setData({shown: false});
+	wrapper.setData({ shown: false });
 	await wrapper.vm.$nextTick();
 
 	expect(document.body.innerHTML).toBe('<!---->');
 
-	wrapper.setData({shown: true});
+	wrapper.setData({ shown: true });
 	await wrapper.vm.$nextTick();
 
 	expect(document.body.innerHTML).toBe('A');
@@ -611,23 +611,23 @@ test('Parent nested v-if', async () => {
 
 	const attachTo = document.createElement('div');
 	document.body.append(attachTo);
-	const $parent = mount(ParentComp, {attachTo});
+	const $parent = mount(ParentComp, { attachTo });
 
 	expect(document.body.innerHTML).toBe('Parent <div>Child</div>');
 
-	const $child = $parent.findComponent({ref: 'child'});
+	const $child = $parent.findComponent({ ref: 'child' });
 
-	$parent.setData({shown: false});
+	$parent.setData({ shown: false });
 	await $parent.vm.$nextTick();
 
 	expect(document.body.innerHTML).toBe('Parent <!---->');
 
-	$child.setData({shown: true});
+	$child.setData({ shown: true });
 	await $child.vm.$nextTick();
 
 	expect(document.body.innerHTML).toBe('Parent <!---->');
 
-	$parent.setData({shown: true});
+	$parent.setData({ shown: true });
 	await $parent.vm.$nextTick();
 
 	expect(document.body.innerHTML).toBe('Parent <div>Child</div>');
@@ -666,11 +666,11 @@ test('v-html', async () => {
 	const wrapper = mount(usage);
 	expect(wrapper.html()).toBe('<article>\n  <div>0</div>\n  <div>1</div>\n</article>');
 
-	wrapper.setData({num: 1});
+	wrapper.setData({ num: 1 });
 	await wrapper.vm.$nextTick();
 	expect(wrapper.html()).toBe('<article>\n  <div>1</div>\n  <div>2</div>\n</article>');
 
-	wrapper.setData({num: 2});
+	wrapper.setData({ num: 2 });
 	await wrapper.vm.$nextTick();
 	expect(wrapper.html()).toBe('<article>\n  <div>2</div>\n  <div>3</div>\n</article>');
 });
@@ -751,15 +751,15 @@ test('v-if slot', async () => {
 	const wrapper = mount(usage);
 	expect(wrapper.html()).toBe(empty);
 
-	wrapper.setData({show: true});
+	wrapper.setData({ show: true });
 	await wrapper.vm.$nextTick();
 	expect(wrapper.html()).toBe(ifTrue);
 
-	wrapper.setData({show: false});
+	wrapper.setData({ show: false });
 	await wrapper.vm.$nextTick();
 	expect(wrapper.html()).toBe(empty);
 
-	wrapper.setData({show: true});
+	wrapper.setData({ show: true });
 	await wrapper.vm.$nextTick();
 	expect(wrapper.html()).toBe(ifTrue);
 });

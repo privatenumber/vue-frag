@@ -63,7 +63,8 @@
 			"browser": true
 		},
 		"rules": {
-			"symbol-description": "off"
+			"symbol-description": "off",
+			"unicorn/no-array-for-each": "off"
 		}
 	}
 }
