@@ -16,49 +16,49 @@ function setFakeParent(node, fakeParent) {
 const resetChildren = (frag, moveTo) => {
 	const nodes = frag.splice(0);
 	moveTo.append(...nodes);
-	nodes.forEach(node => {
+	nodes.forEach((node) => {
 		node[$fakeParent] = undefined;
 	});
 };
 
-function insertBefore(newNode, refNode) {
-	const newNodes = newNode.frag || [newNode];
+function insertBefore(insertNode, referenceNode) {
+	const insertNodes = insertNode.frag || [insertNode];
 
 	if (this.frag) {
-		const idx = this.frag.indexOf(refNode);
-		if (idx > -1) {
-			this.frag.splice(idx, 0, ...newNodes);
+		const index = this.frag.indexOf(referenceNode);
+		if (index > -1) {
+			this.frag.splice(index, 0, ...insertNodes);
 		}
 	}
 
 	if (this[$fakeChildren]) {
-		const hasFakeChildren = this[$fakeChildren].get(refNode);
+		const hasFakeChildren = this[$fakeChildren].get(referenceNode);
 		if (hasFakeChildren) {
-			refNode = hasFakeChildren[0];
+			[referenceNode] = hasFakeChildren;
 		}
 	}
 
-	if (refNode) {
-		refNode.before(...newNodes);
+	if (referenceNode) {
+		referenceNode.before(...insertNodes);
 	} else {
-		this.append(...newNodes);
+		this.append(...insertNodes);
 	}
 
-	newNodes.forEach(newNode => setFakeParent(newNode, this));
+	insertNodes.forEach(node => setFakeParent(node, this));
 }
 
 function removeChild(node) {
 	if (this.frag) {
-		const idx = this.frag.indexOf(node);
-		if (idx > -1) {
-			const spliceArgs = [idx, 1];
+		const nodeIndex = this.frag.indexOf(node);
+		if (nodeIndex > -1) {
+			const spliceArguments = [nodeIndex, 1];
 			if (this.frag.length === 1) {
 				const placeholder = this[$placeholder];
 				this.frag[0].before(placeholder);
-				spliceArgs.push(placeholder);
+				spliceArguments.push(placeholder);
 			}
 
-			this.frag.splice(...spliceArgs);
+			this.frag.splice(...spliceArguments);
 		}
 	}
 
@@ -99,7 +99,7 @@ const elementPatches = {
 
 	remove() {
 		const placeholder = this[$placeholder];
-		const {frag} = this;
+		const { frag } = this;
 		const removed = frag.splice(0, frag.length, placeholder);
 		removed[0].before(this[$placeholder]);
 		removed.forEach(element => element.remove());
@@ -108,7 +108,7 @@ const elementPatches = {
 	removeChild,
 
 	appendChild(node) {
-		const {length} = this.frag;
+		const { length } = this.frag;
 		this.frag[length - 1].after(node);
 
 		const placeholder = this[$placeholder];
@@ -126,7 +126,7 @@ const frag = {
 	inserted(element) {
 		const nodes = Array.from(element.childNodes);
 
-		const {parentNode: parent} = element;
+		const { parentNode: parent } = element;
 
 		const placeholder = document.createComment('');
 		element[$placeholder] = placeholder;
@@ -152,10 +152,10 @@ const frag = {
 				const domify = document.createElement('div');
 				domify.innerHTML = htmlString;
 
-				const oldNodesIdx = element.frag.length;
+				const oldNodesIndex = element.frag.length;
 				// eslint-disable-next-line unicorn/prefer-dom-node-append
 				Array.from(domify.childNodes).forEach(node => element.appendChild(node));
-				domify.append(...element.frag.splice(0, oldNodesIdx));
+				domify.append(...element.frag.splice(0, oldNodesIndex));
 			},
 			get() {
 				return '';

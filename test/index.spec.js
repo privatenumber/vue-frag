@@ -1,4 +1,4 @@
-import frag from 'vue-frag';
+import frag from '..';
 import { mount } from '@vue/test-utils';
 
 test('Basic usage', () => {

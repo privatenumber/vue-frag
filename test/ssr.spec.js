@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 
-import frag from 'vue-frag';
+import frag from '..';
 import { render } from '@vue/server-test-utils';
 
 test('SSR', async () => {
