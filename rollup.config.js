@@ -1,15 +1,15 @@
 import babel from '@rollup/plugin-babel';
-import {terser} from 'rollup-plugin-terser';
+import { terser } from 'rollup-plugin-terser';
 import filesize from 'rollup-plugin-filesize';
 
-const isProd = process.env.NODE_ENV === 'production';
+const isProduction = process.env.NODE_ENV === 'production';
 
 const rollupConfig = {
 	input: 'src/frag.js',
 	plugins: [
 		babel(),
-		isProd && terser(),
-		isProd && filesize(),
+		isProduction && terser(),
+		isProduction && filesize(),
 	],
 	output: [
 		{

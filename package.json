@@ -25,7 +25,7 @@
 	"scripts": {
 		"build": "rollup -c --environment NODE_ENV:production",
 		"test": "jest",
-		"lint": "xo"
+		"lint": "eslint ."
 	},
 	"husky": {
 		"hooks": {
@@ -34,17 +34,19 @@
 	},
 	"lint-staged": {
 		"*.js": [
-			"xo --fix",
+			"eslint --fix",
 			"jest --bail --findRelatedTests"
 		]
 	},
 	"devDependencies": {
 		"@babel/preset-env": "^7.12.13",
 		"@rollup/plugin-babel": "^5.2.3",
+		"@pvtnbr/eslint-config-base": "^0.1.14",
 		"@vue/server-test-utils": "^1.1.3",
 		"@vue/test-utils": "^1.1.3",
 		"babel-jest": "^26.6.3",
 		"core-js": "^3.8.3",
+		"eslint": "^7.19.0",
 		"husky": "^4.3.8",
 		"jest": "^26.6.3",
 		"lint-staged": "^10.5.4",
@@ -53,7 +55,16 @@
 		"rollup-plugin-terser": "^7.0.2",
 		"vue": "^2.6.12",
 		"vue-server-renderer": "^2.6.12",
-		"vue-template-compiler": "^2.6.12",
-		"xo": "^0.37.1"
+		"vue-template-compiler": "^2.6.12"
+	},
+	"eslintConfig": {
+		"extends": "@pvtnbr/eslint-config-base",
+		"env": {
+			"browser": true
+		},
+		"rules": {
+			"symbol-description": "off",
+			"unicorn/no-array-for-each": "off"
+		}
 	}
 }
