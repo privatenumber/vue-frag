@@ -1,5 +1,5 @@
-import frag from '..';
 import { mount } from '@vue/test-utils';
+import frag from '../dist/frag.js';
 
 test('Basic usage', () => {
 	const string = `Hello world ${Date.now()}`;
