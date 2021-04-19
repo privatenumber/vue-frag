@@ -17,13 +17,11 @@ Use [Vue 3's Fragment feature](https://v3.vuejs.org/guide/migration/fragments.ht
 
 <sub>If you like this project, please star it & [follow me](https://github.com/privatenumber) to see what other cool projects I'm working on! ❤️</sub>
 
-## 🙋‍♂️ Why?
+## 🌟 Features
 - **✅ Multiple root nodes** Without creating a functional component!
 - **🔥 SSR** Unwraps the root element on client-side post-hydration!
 - **⚡️ Directives** Supports `v-if`, `v-for`, and `v-html`!
-- **🐥 Tiny** Only `816 B`!
-
-For a detailed explanation, checkout the [FAQ](#when-would-i-want-to-return-multiple-root-nodes) below.
+- **👩‍🔬 Battle-tested** Checkout the tests [here](/test/)!
 
 ## 🚀 Install
 ```sh
@@ -115,9 +113,7 @@ export default {
 
 Whenever you feel like the root-element of your component adds no value and is unnecessary, or is messing up your HTML output. This usually happens when you want to return a list of elements like `<li>List Items</li>` or `<tr><td>Table Rows</td></tr>` but you have to wrap it in a `<div>`.
 
-Returning multiple root nodes is a major feature released in Vue 3 known as [Fragments](https://v3.vuejs.org/guide/migration/fragments.html). This directive makes it available to Vue 2.
-
-In Vue 2, it's worth noting that it's possible to return multiple nodes with a [Functional Component](https://vuejs.org/v2/guide/render-function.html#Functional-Components) but functional components are stateless (no `data()`), don't support `methods` or [life-cycle hooks](https://vuejs.org/v2/guide/instance.html#Lifecycle-Diagram), don't have very good template support, and can lead to SSR bugs (eg. mismatching nodes).
+In Vue 2, it's possible to return multiple nodes with a [Functional Component](https://vuejs.org/v2/guide/render-function.html#Functional-Components) but functional components are stateless (no `data()` or [life-cycle hooks](https://vuejs.org/v2/guide/instance.html#Lifecycle-Diagram)), doesn't support `methods`, doesn't have very good template support, and can lead to SSR bugs (eg. mismatching nodes).
 
 Related VueJS Issues / Stackoverflow Qs:
 - [vuejs/vue #7088](https://github.com/vuejs/vue/issues/7088)
