@@ -15,7 +15,8 @@ function setFakeParent(node, fakeParent) {
 }
 
 function setFakeNextSibling(node, fakeNextSibling) {
-	if (!node[$fakeNextSibling]) {
+	// eslint-disable-next-line no-prototype-builtins
+	if (!node.hasOwnProperty($fakeNextSibling)) {
 		node[$fakeNextSibling] = fakeNextSibling;
 		Object.defineProperty(node, 'nextSibling', {
 			get() {
