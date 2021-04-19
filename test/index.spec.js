@@ -763,3 +763,84 @@ test('v-if slot', async () => {
 	await wrapper.vm.$nextTick();
 	expect(wrapper.html()).toBe(ifTrue);
 });
+
+// #27
+test('transition - swapping components', async () => {
+	const ChildA = {
+		template: '<div v-frag>1a</div>',
+		directives: {
+			frag,
+		},
+	};
+
+	const ChildB = {
+		template: '<div>1b</div>',
+	};
+
+	const usage = {
+		template: `
+			<div>
+				<transition :css="false">
+					<child-a v-if="showA" />
+					<child-b v-else />
+				</transition>
+				2
+			</div>
+		`,
+		components: {
+			ChildA,
+			ChildB,
+		},
+		data() {
+			return {
+				showA: true,
+			};
+		},
+	};
+
+	const wrapper = mount(usage, {
+		stubs: {
+			// Disable the default transition stub
+			transition: false,
+		},
+	});
+
+	expect(wrapper.html()).toBe('<div>1a\n  2\n</div>');
+
+	await wrapper.setData({ showA: false });
+	expect(wrapper.html()).toBe('<div>\n  <div>1b</div>\n  2\n</div>');
+});
+
+test('transition - frag to element', async () => {
+	const usage = {
+		data() {
+			return {
+				showA: true,
+			};
+		},
+		template: `
+		<div>
+			<transition :css="false">
+				<span v-if="showA" v-frag key="a">1a</span>
+				<span v-else key="b">1b</span>
+			</transition>
+			2
+		</div>
+		`,
+		directives: {
+			frag,
+		},
+	};
+
+	const wrapper = mount(usage, {
+		stubs: {
+			// Disable the default transition stub
+			transition: false,
+		},
+	});
+
+	expect(wrapper.html()).toBe('<div>1a\n  2\n</div>');
+
+	await wrapper.setData({ showA: false });
+	expect(wrapper.html()).toBe('<div><span>1b</span>\n  2\n</div>');
+});
