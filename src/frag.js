@@ -190,9 +190,7 @@ const frag = {
 		resetChildren(element.frag, element);
 		element[$placeholder].remove();
 
-		delete element[$fakeParent];
-		delete element[$fakeNextSibling];
-		delete element.frag;
+		// Not necessary to clean up .frag, etc because Node is scrapped
 	},
 };
 
