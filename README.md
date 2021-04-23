@@ -57,6 +57,36 @@ export default {
 </script>
 ```
 
+#### Prefer a component API?
+Create a `Fragment.vue` component:
+
+```vue
+<template>
+    <div v-frag>
+        <slot />
+    </div>
+</template>
+
+<script>
+import frag from 'vue-frag';
+
+export default {
+    directives: {
+        frag
+    }
+};
+</script>
+```
+
+And use it as a component:
+```vue
+<template>
+    <fragment>
+        No root node!
+    </fragment>
+</template>
+```
+
 ## 👨🏻‍🏫 Examples
 
 #### Returning multiple root nodes <a href="https://codepen.io/hirokiosame/pen/PoNVZbV"><img src="https://img.shields.io/badge/codepen.io-demo-blue" valign="bottom"></a>
