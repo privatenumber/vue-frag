@@ -82,7 +82,7 @@ And use it as a component:
 ```vue
 <template>
     <fragment>
-        No root node!
+        No root element!
     </fragment>
 </template>
 ```
