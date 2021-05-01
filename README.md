@@ -15,7 +15,7 @@ Use [Vue 3's Fragment feature](https://v3.vuejs.org/guide/migration/fragments.ht
 
 👉 Try out a [demo in this CodePen](https://codepen.io/hirokiosame/pen/PoNVZbV)!
 
-<sub>If you like this project, please star it & [follow me](https://github.com/privatenumber) to see what other cool projects I'm working on! ❤️</sub>
+<sub>Support this project by ⭐️ starring and sharing it. [Follow me](https://github.com/privatenumber) to see what other cool projects I'm working on! ❤️</sub>
 
 ## 🌟 Features
 - **✅ Multiple root nodes** Without creating a functional component!
