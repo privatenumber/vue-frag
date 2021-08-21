@@ -15,17 +15,20 @@ const rollupConfig = {
 		{
 			format: 'es',
 			file: 'dist/frag.esm.js',
+			sourcemap: true,
 		},
 		{
 			format: 'cjs',
 			file: 'dist/frag.cjs.js',
 			exports: 'default',
+			sourcemap: true,
 		},
 		{
 			format: 'umd',
 			file: 'dist/frag.js',
 			name: 'Frag',
 			exports: 'default',
+			sourcemap: true,
 		},
 	],
 };
