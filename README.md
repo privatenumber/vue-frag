@@ -15,7 +15,7 @@ Use [Vue 3's Fragment feature](https://v3.vuejs.org/guide/migration/fragments.ht
 
 👉 Try out a [demo in this CodePen](https://codepen.io/hirokiosame/pen/PoNVZbV)!
 
-<sub>If you like this project, please star it & [follow me](https://github.com/privatenumber) to see what other cool projects I'm working on! ❤️</sub>
+<sub>Support this project by ⭐️ starring and sharing it. [Follow me](https://github.com/privatenumber) to see what other cool projects I'm working on! ❤️</sub>
 
 ## 🌟 Features
 - **✅ Multiple root nodes** Without creating a functional component!
@@ -55,6 +55,36 @@ export default {
     ...
 };
 </script>
+```
+
+#### Prefer a component API?
+Create a `Fragment.vue` component:
+
+```vue
+<template>
+    <div v-frag>
+        <slot />
+    </div>
+</template>
+
+<script>
+import frag from 'vue-frag';
+
+export default {
+    directives: {
+        frag
+    }
+};
+</script>
+```
+
+And use it as a component:
+```vue
+<template>
+    <fragment>
+        No root element!
+    </fragment>
+</template>
 ```
 
 ## 👨🏻‍🏫 Examples
