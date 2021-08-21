@@ -2,35 +2,54 @@ import babel from '@rollup/plugin-babel';
 import { terser } from 'rollup-plugin-terser';
 import filesize from 'rollup-plugin-filesize';
 
-const isProduction = process.env.NODE_ENV === 'production';
-
 const rollupConfig = {
 	input: 'src/frag.js',
 	plugins: [
 		babel(),
-		isProduction && terser(),
-		isProduction && filesize(),
+		filesize(),
 	],
 	output: [
 		{
 			format: 'es',
 			file: 'dist/frag.esm.js',
-			sourcemap: true,
 		},
 		{
 			format: 'cjs',
 			file: 'dist/frag.cjs.js',
 			exports: 'default',
-			sourcemap: true,
 		},
 		{
 			format: 'umd',
 			file: 'dist/frag.js',
 			name: 'Frag',
 			exports: 'default',
-			sourcemap: true,
 		},
 	],
 };
 
-export default rollupConfig;
+const rollupConfigMin = {
+	input: 'src/frag.js',
+	plugins: [
+		babel(),
+		terser(),
+	],
+	output: [
+		{
+			format: 'es',
+			file: 'dist/frag.esm.min.js',
+		},
+		{
+			format: 'cjs',
+			file: 'dist/frag.cjs.min.js',
+			exports: 'default',
+		},
+		{
+			format: 'umd',
+			file: 'dist/frag.min.js',
+			name: 'Frag',
+			exports: 'default',
+		},
+	],
+};
+
+export default [rollupConfig, rollupConfigMin];
