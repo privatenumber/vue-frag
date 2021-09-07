@@ -945,3 +945,44 @@ test('updating sibling node - removal', async () => {
 
 	expect(wrapper.html()).toBe('<app>ChildChild</app>');
 });
+
+// #16 3
+test('updating sibling node - removal - no nextSibling', async () => {
+	const Child = {
+		template: '<frag v-frag v-if="show">Child</frag>',
+		props: ['show'],
+		directives: {
+			frag,
+		},
+	};
+
+	const usage = {
+		// Important that this is in one-line
+		// When breaking into multiple lines, it inserts a textNode in between and breaks reproduction
+		template: '<app><span v-if="isVisible" /><child :show="isVisible" /><span v-if="isVisible" /></app>',
+
+		components: {
+			Child,
+		},
+
+		data() {
+			return {
+				isVisible: true,
+			};
+		},
+	};
+
+	const wrapper = mount(usage);
+
+	expect(wrapper.html()).toBe('<app><span></span>Child<span></span></app>');
+
+	wrapper.setData({ isVisible: false });
+	await wrapper.vm.$nextTick();
+
+	expect(wrapper.html()).toBe('<app>\n  <!---->\n  <!---->\n  <!---->\n</app>');
+
+	wrapper.setData({ isVisible: true });
+	await wrapper.vm.$nextTick();
+
+	expect(wrapper.html()).toBe('<app><span></span>Child<span></span></app>');
+});
