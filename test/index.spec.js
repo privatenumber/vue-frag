@@ -622,6 +622,7 @@ test('Parent nested v-if', async () => {
 
 	expect(document.body.innerHTML).toBe('Parent <!---->');
 
+	// Updating destroyed child should have no lingering effects on parent
 	$child.setData({ shown: true });
 	await $child.vm.$nextTick();
 
@@ -843,4 +844,45 @@ test('transition - frag to element', async () => {
 
 	await wrapper.setData({ showA: false });
 	expect(wrapper.html()).toBe('<div><span>1b</span>\n  2\n</div>');
+});
+
+// #16
+test('updating sibling node', async () => {
+	const Child = {
+		template: '<div v-frag v-if="show">Child</div>',
+		props: ['show'],
+		directives: {
+			frag,
+		},
+	};
+
+	const usage = {
+		// Important that this is in one-line
+		// When breaking into multiple lines, it inserts a textNode in between and breaks reproduction
+		template: '<div><child :show="isVisible" /><span v-if="isVisible" /></div>',
+
+		components: {
+			Child,
+		},
+
+		data() {
+			return {
+				isVisible: true,
+			};
+		},
+	};
+
+	const wrapper = mount(usage);
+
+	expect(wrapper.html()).toBe('<div>Child<span></span></div>');
+
+	wrapper.setData({ isVisible: false });
+	await wrapper.vm.$nextTick();
+
+	expect(wrapper.html()).toBe('<div>\n  <!---->\n  <!---->\n</div>');
+
+	wrapper.setData({ isVisible: true });
+	await wrapper.vm.$nextTick();
+
+	expect(wrapper.html()).toBe('<div>Child<span></span></div>');
 });
