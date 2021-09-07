@@ -20,8 +20,7 @@ function setFakeNextSibling(node, fakeNextSibling) {
 	if (!node.hasOwnProperty($fakeNextSibling)) {
 		Object.defineProperty(node, 'nextSibling', {
 			get() {
-				// eslint-disable-next-line no-prototype-builtins
-				if (!this.hasOwnProperty($fakeNextSibling)) {
+				if (!this[$fakeNextSibling]) {
 					const childIndex = Array.from(this.parentNode.childNodes).indexOf(this);
 					return this.parentNode.childNodes.item(childIndex + 1);
 				}
@@ -32,7 +31,9 @@ function setFakeNextSibling(node, fakeNextSibling) {
 	}
 
 	node[$fakeNextSibling] = fakeNextSibling;
-	fakeNextSibling[$fakeNextSiblingBackReference] = node;
+	if (fakeNextSibling) {
+		fakeNextSibling[$fakeNextSiblingBackReference] = node;
+	}
 }
 
 const resetChildren = (frag, moveTo) => {
