@@ -1,5 +1,6 @@
 const $fakeParent = Symbol();
 const $fakeNextSibling = Symbol();
+const $fakeNextSiblingBackReference = Symbol();
 const $fakeChildren = Symbol();
 const $placeholder = Symbol();
 
@@ -17,7 +18,6 @@ function setFakeParent(node, fakeParent) {
 function setFakeNextSibling(node, fakeNextSibling) {
 	// eslint-disable-next-line no-prototype-builtins
 	if (!node.hasOwnProperty($fakeNextSibling)) {
-		node[$fakeNextSibling] = fakeNextSibling;
 		Object.defineProperty(node, 'nextSibling', {
 			get() {
 				// eslint-disable-next-line no-prototype-builtins
@@ -30,6 +30,9 @@ function setFakeNextSibling(node, fakeNextSibling) {
 			},
 		});
 	}
+
+	node[$fakeNextSibling] = fakeNextSibling;
+	fakeNextSibling[$fakeNextSiblingBackReference] = node;
 }
 
 const resetChildren = (frag, moveTo) => {
@@ -43,6 +46,7 @@ const resetChildren = (frag, moveTo) => {
 function insertBefore(insertNode, insertBeforeNode) {
 	const insertNodes = insertNode.frag || [insertNode];
 
+	// If this element is a fragment, insert nodes in virtual fragment
 	if (this.frag) {
 		const index = this.frag.indexOf(insertBeforeNode);
 		if (index > -1) {
@@ -50,15 +54,23 @@ function insertBefore(insertNode, insertBeforeNode) {
 		}
 	}
 
+	//  If this element has fake children, and targetNode is a fragmentNode
 	if (this[$fakeChildren]) {
 		const hasFakeChildren = this[$fakeChildren].get(insertBeforeNode);
 		if (hasFakeChildren) {
-			[insertBeforeNode] = hasFakeChildren;
+			[insertBeforeNode] = hasFakeChildren; // update target with first child of fragment
 		}
 	}
 
 	if (insertBeforeNode) {
 		insertBeforeNode.before(...insertNodes);
+
+		// Update previous fragment to point at new node
+		if (insertBeforeNode[$fakeNextSiblingBackReference]) {
+			const fragBefore = insertBeforeNode[$fakeNextSiblingBackReference];
+			setFakeNextSibling(fragBefore, insertNodes[0]);
+			insertBeforeNode[$fakeNextSiblingBackReference] = undefined;
+		}
 	} else {
 		this.append(...insertNodes);
 	}
@@ -143,6 +155,8 @@ const elementPatches = {
 
 const frag = {
 	inserted(element) {
+		// At inserted, we want to remove the element,
+		// and insert its children in place of it
 		const {
 			parentNode,
 			nextSibling,
@@ -150,12 +164,14 @@ const frag = {
 		const childNodes = Array.from(element.childNodes);
 		element.frag = childNodes;
 
+		// If there are no children, insert a comment placeholder to mark the location
 		const placeholder = document.createComment('');
 		element[$placeholder] = placeholder;
 		if (childNodes.length === 0) {
 			childNodes.push(placeholder);
 		}
 
+		// Swap element with children (or placeholder)
 		const fragment = document.createDocumentFragment();
 		fragment.append(...childNodes);
 		element.replaceWith(fragment);
@@ -163,7 +179,10 @@ const frag = {
 		patchParentMethods(parentNode, element, childNodes);
 
 		setFakeParent(element, parentNode);
-		setFakeNextSibling(element, nextSibling);
+
+		if (nextSibling) {
+			setFakeNextSibling(element, nextSibling);
+		}
 
 		childNodes.forEach(node => setFakeParent(node, element));
 
