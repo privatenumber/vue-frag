@@ -104,6 +104,13 @@ function removeChild(node) {
 		}
 	}
 
+	if (node[$fakeNextSiblingBackReference]) {
+		const fragBefore = node[$fakeNextSiblingBackReference];
+
+		setFakeNextSibling(fragBefore, node.nextSibling);
+		node[$fakeNextSiblingBackReference] = undefined;
+	}
+
 	node.remove();
 }
 

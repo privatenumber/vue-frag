@@ -1,24 +1,27 @@
+import Vue from 'vue';
 import { mount } from '@vue/test-utils';
 import frag from '../dist/frag.js';
+
+Vue.config.ignoredElements = ['app', 'frag'];
 
 test('Basic usage', () => {
 	const string = `Hello world ${Date.now()}`;
 	const TestComponent = {
-		template: `<span v-frag>${string}</span>`,
+		template: `<frag v-frag>${string}</frag>`,
 		directives: {
 			frag,
 		},
 	};
 
 	const usage = {
-		template: '<div><test-component /></div>',
+		template: '<app><test-component /></app>',
 		components: {
 			TestComponent,
 		},
 	};
 
 	const wrapper = mount(usage);
-	expect(wrapper.html().trim()).toBe(`<div>${string}</div>`);
+	expect(wrapper.html().trim()).toBe(`<app>${string}</app>`);
 });
 
 test('Frag on app root', () => {
@@ -85,7 +88,7 @@ describe('Reactivity', () => {
 	test('Data', async () => {
 		const TestComponent = {
 			template: `
-				<span v-frag>Hello world {{ number }}</span>
+				<frag v-frag>Hello world {{ number }}</frag>
 			`,
 			directives: {
 				frag,
@@ -95,7 +98,7 @@ describe('Reactivity', () => {
 
 		const usage = {
 			template: `
-				<article><test-component :number="number" /></article>
+				<app><test-component :number="number" /></app>
 			`,
 			components: {
 				TestComponent,
@@ -112,15 +115,15 @@ describe('Reactivity', () => {
 		wrapper.setData({ number });
 		await wrapper.vm.$nextTick();
 
-		expect(wrapper.html()).toBe(`<article>Hello world ${number}</article>`);
+		expect(wrapper.html()).toBe(`<app>Hello world ${number}</app>`);
 	});
 
 	test('v-if template', async () => {
 		const TestComponent = {
 			template: `
-				<span v-frag>
+				<frag v-frag>
 					<template v-if="show">A</template>
-				</span>
+				</frag>
 			`,
 			directives: {
 				frag,
@@ -130,9 +133,9 @@ describe('Reactivity', () => {
 
 		const usage = {
 			template: `
-				<div class="wrapper">
+				<app class="wrapper">
 					<test-component :show="show" />
-				</div>
+				</app>
 			`,
 			components: {
 				TestComponent,
@@ -144,8 +147,8 @@ describe('Reactivity', () => {
 			},
 		};
 
-		const empty = '<div class="wrapper">\n  <!---->\n</div>';
-		const ifTrue = '<div class="wrapper">A</div>';
+		const empty = '<app class="wrapper">\n  <!---->\n</app>';
+		const ifTrue = '<app class="wrapper">A</app>';
 
 		const wrapper = mount(usage);
 		expect(wrapper.html()).toBe(empty);
@@ -166,9 +169,9 @@ describe('Reactivity', () => {
 	test('v-if element', async () => {
 		const TestComponent = {
 			template: `
-				<span v-frag>
+				<frag v-frag>
 					<div v-if="show">A</div>
-				</span>
+				</frag>
 			`,
 			directives: {
 				frag,
@@ -178,9 +181,9 @@ describe('Reactivity', () => {
 
 		const usage = {
 			template: `
-				<div class="wrapper">
+				<app class="wrapper">
 					<test-component :show="show" />
-				</div>
+				</app>
 			`,
 			components: {
 				TestComponent,
@@ -192,8 +195,8 @@ describe('Reactivity', () => {
 			},
 		};
 
-		const empty = '<div class="wrapper">\n  <!---->\n</div>';
-		const ifTrue = '<div class="wrapper">\n  <div>A</div>\n</div>';
+		const empty = '<app class="wrapper">\n  <!---->\n</app>';
+		const ifTrue = '<app class="wrapper">\n  <div>A</div>\n</app>';
 
 		const wrapper = mount(usage);
 		expect(wrapper.html()).toBe(empty);
@@ -213,7 +216,7 @@ describe('Reactivity', () => {
 
 	test('v-for template', async () => {
 		const TestComponent = {
-			template: '<span v-frag><template v-for="i in num">{{ i }}</template></span>',
+			template: '<frag v-frag><template v-for="i in num">{{ i }}</template></frag>',
 			directives: {
 				frag,
 			},
@@ -221,7 +224,7 @@ describe('Reactivity', () => {
 		};
 
 		const usage = {
-			template: '<div><test-component :num="num" /></div>',
+			template: '<app><test-component :num="num" /></app>',
 			components: {
 				TestComponent,
 			},
@@ -232,7 +235,7 @@ describe('Reactivity', () => {
 			},
 		};
 
-		const tpl = number => `<div>${number}</div>`;
+		const tpl = number => `<app>${number}</app>`;
 
 		const wrapper = mount(usage);
 		expect(wrapper.html()).toBe(tpl('\n  <!---->\n'));
@@ -253,9 +256,9 @@ describe('Reactivity', () => {
 	test('v-for element', async () => {
 		const TestComponent = {
 			template: `
-				<span v-frag>
+				<frag v-frag>
 					<div v-for="i in num">{{ i }}</div>
-				</span>
+				</frag>
 			`,
 			directives: {
 				frag,
@@ -265,9 +268,9 @@ describe('Reactivity', () => {
 
 		const usage = {
 			template: `
-				<div>
+				<app>
 					<test-component :num="num" />
-				</div>
+				</app>
 			`,
 			components: {
 				TestComponent,
@@ -279,7 +282,7 @@ describe('Reactivity', () => {
 			},
 		};
 
-		const tpl = number => `<div>\n  ${number.map(n => `<div>${n}</div>`).join('\n  ')}\n</div>`;
+		const tpl = number => `<app>\n  ${number.map(n => `<div>${n}</div>`).join('\n  ')}\n</app>`;
 
 		const wrapper = mount(usage);
 		await wrapper.vm.$nextTick();
@@ -297,10 +300,10 @@ describe('Reactivity', () => {
 	test('slot w/ v-if', async () => {
 		const TestComponent = {
 			template: `
-				<span v-frag>
+				<frag v-frag>
 					<template v-if="show">{{ name }}</template>
 					<slot />
-				</span>
+				</frag>
 			`,
 			directives: {
 				frag,
@@ -310,11 +313,11 @@ describe('Reactivity', () => {
 
 		const usage = {
 			template: `
-				<div class="wrapper">
+				<app class="wrapper">
 					<test-component name="A" :show="show">
 						<test-component name="B" :show="show" />
 					</test-component>
-				</div>
+				</app>
 			`,
 			components: {
 				TestComponent,
@@ -326,8 +329,8 @@ describe('Reactivity', () => {
 			},
 		};
 
-		const empty = '<div class="wrapper">\n  <!---->\n  <!---->\n</div>';
-		const ifTrue = '<div class="wrapper">A B </div>';
+		const empty = '<app class="wrapper">\n  <!---->\n  <!---->\n</app>';
+		const ifTrue = '<app class="wrapper">A B </app>';
 
 		const wrapper = mount(usage);
 		expect(wrapper.html()).toBe(empty);
@@ -348,10 +351,10 @@ describe('Reactivity', () => {
 	test('slot w/ v-for', async () => {
 		const TestComponent = {
 			template: `
-				<span v-frag>
+				<frag v-frag>
 					<div v-for="i in num">{{ name }} {{ i }}</div>
 					<slot />
-				</span>
+				</frag>
 			`,
 			directives: {
 				frag,
@@ -361,14 +364,14 @@ describe('Reactivity', () => {
 
 		const usage = {
 			template: `
-				<div>
+				<app>
 					<test-component name="A" :num="num">
 						<test-component name="B" :num="num">
 							<test-component name="C" :num="num" />
 							</test-component>
 						</test-component>
 					</test-component>
-				</div>
+				</app>
 			`,
 			components: {
 				TestComponent,
@@ -380,7 +383,7 @@ describe('Reactivity', () => {
 			},
 		};
 
-		const tpl = number => `<div>\n  ${number.map(n => `<div>${n}</div>`).join('\n  ')}\n</div>`;
+		const tpl = number => `<app>\n  ${number.map(n => `<div>${n}</div>`).join('\n  ')}\n</app>`;
 
 		const wrapper = mount(usage);
 		await wrapper.vm.$nextTick();
@@ -434,7 +437,7 @@ test('Parent v-if', async () => {
 
 test('Parent multiple v-if', async () => {
 	const TestComponent = {
-		template: '<span v-frag><div>Hello world {{ name }}</div></span>',
+		template: '<frag v-frag><div>Hello world {{ name }}</div></frag>',
 		directives: {
 			frag,
 		},
@@ -443,11 +446,11 @@ test('Parent multiple v-if', async () => {
 
 	const usage = {
 		template: `
-			<article>
+			<app>
 				<test-component name="A" key="a" v-if="show" />
 				<test-component name="B" key="b" v-if="!show"/>
 				<test-component name="C" key="c" v-if="show" />
-			</article>
+			</app>
 		`,
 		components: {
 			TestComponent,
@@ -460,22 +463,22 @@ test('Parent multiple v-if', async () => {
 	};
 
 	const wrapper = mount(usage);
-	expect(wrapper.html()).toBe('<article>\n  <div>Hello world A</div>\n  <!---->\n  <div>Hello world C</div>\n</article>');
+	expect(wrapper.html()).toBe('<app>\n  <div>Hello world A</div>\n  <!---->\n  <div>Hello world C</div>\n</app>');
 
 	wrapper.setData({ show: false });
 	await wrapper.vm.$nextTick();
 
-	expect(wrapper.html()).toBe('<article>\n  <!---->\n  <div>Hello world B</div>\n  <!---->\n</article>');
+	expect(wrapper.html()).toBe('<app>\n  <!---->\n  <div>Hello world B</div>\n  <!---->\n</app>');
 
 	wrapper.setData({ show: true });
 	await wrapper.vm.$nextTick();
 
-	expect(wrapper.html()).toBe('<article>\n  <div>Hello world A</div>\n  <!---->\n  <div>Hello world C</div>\n</article>');
+	expect(wrapper.html()).toBe('<app>\n  <div>Hello world A</div>\n  <!---->\n  <div>Hello world C</div>\n</app>');
 });
 
 test('Parent nested v-if empty', async () => {
 	const ChildComp = {
-		template: '<article v-frag></article>',
+		template: '<frag v-frag></frag>',
 
 		directives: {
 			frag,
@@ -483,7 +486,7 @@ test('Parent nested v-if empty', async () => {
 	};
 
 	const ParentComp = {
-		template: '<section v-frag>Parent <child-comp v-if="shown" ref="child" /><div v-else>No Child</div></section>',
+		template: '<frag v-frag>Parent <child-comp v-if="shown" ref="child" /><div v-else>No Child</div></frag>',
 
 		directives: {
 			frag,
@@ -524,7 +527,7 @@ test('Parent nested v-if empty', async () => {
 
 test('Parent nested v-if text', async () => {
 	const ChildComp = {
-		template: '<article v-frag>A</article>',
+		template: '<frag v-frag>A</frag>',
 
 		directives: {
 			frag,
@@ -532,7 +535,7 @@ test('Parent nested v-if text', async () => {
 	};
 
 	const ParentComp = {
-		template: '<section v-frag><child-comp v-if="shown" /></section>',
+		template: '<frag v-frag><child-comp v-if="shown" /></frag>',
 
 		directives: {
 			frag,
@@ -578,7 +581,7 @@ test('Parent nested v-if text', async () => {
 
 test('Parent nested v-if', async () => {
 	const ChildComp = {
-		template: '<div v-frag><div v-if="shown">Child</div></div>',
+		template: '<frag v-frag><div v-if="shown">Child</div></frag>',
 
 		directives: {
 			frag,
@@ -592,7 +595,7 @@ test('Parent nested v-if', async () => {
 	};
 
 	const ParentComp = {
-		template: '<div v-frag>Parent <child-comp v-if="shown" ref="child" /></div>',
+		template: '<frag v-frag>Parent <child-comp v-if="shown" ref="child" /></frag>',
 
 		directives: {
 			frag,
@@ -640,7 +643,7 @@ test('Parent nested v-if', async () => {
 
 test('v-html', async () => {
 	const TestComponent = {
-		template: '<span v-frag v-html="code" />',
+		template: '<frag v-frag v-html="code" />',
 		directives: {
 			frag,
 		},
@@ -653,7 +656,7 @@ test('v-html', async () => {
 	};
 
 	const usage = {
-		template: '<article><test-component :num="num"/></article>',
+		template: '<app><test-component :num="num"/></app>',
 		components: {
 			TestComponent,
 		},
@@ -665,21 +668,21 @@ test('v-html', async () => {
 	};
 
 	const wrapper = mount(usage);
-	expect(wrapper.html()).toBe('<article>\n  <div>0</div>\n  <div>1</div>\n</article>');
+	expect(wrapper.html()).toBe('<app>\n  <div>0</div>\n  <div>1</div>\n</app>');
 
 	wrapper.setData({ num: 1 });
 	await wrapper.vm.$nextTick();
-	expect(wrapper.html()).toBe('<article>\n  <div>1</div>\n  <div>2</div>\n</article>');
+	expect(wrapper.html()).toBe('<app>\n  <div>1</div>\n  <div>2</div>\n</app>');
 
 	wrapper.setData({ num: 2 });
 	await wrapper.vm.$nextTick();
-	expect(wrapper.html()).toBe('<article>\n  <div>2</div>\n  <div>3</div>\n</article>');
+	expect(wrapper.html()).toBe('<app>\n  <div>2</div>\n  <div>3</div>\n</app>');
 });
 
 // #17
 test('child order change', async () => {
 	const TestComponent = {
-		template: '<div v-frag>{{ num }}</div>',
+		template: '<frag v-frag>{{ num }}</frag>',
 		directives: {
 			frag,
 		},
@@ -687,7 +690,7 @@ test('child order change', async () => {
 	};
 
 	const usage = {
-		template: '<div><test-component v-for="i in numbers" :key="i" :num="i" /></div>',
+		template: '<app><test-component v-for="i in numbers" :key="i" :num="i" /></app>',
 		components: {
 			TestComponent,
 		},
@@ -704,7 +707,7 @@ test('child order change', async () => {
 		},
 	};
 
-	const tpl = number => `<div>${number}</div>`;
+	const tpl = number => `<app>${number}</app>`;
 
 	const wrapper = mount(usage);
 
@@ -724,7 +727,7 @@ test('child order change', async () => {
 // #21
 test('v-if slot', async () => {
 	const TestComponent = {
-		template: '<div v-frag><slot /></div>',
+		template: '<frag v-frag><slot /></frag>',
 		directives: {
 			frag,
 		},
@@ -732,9 +735,9 @@ test('v-if slot', async () => {
 
 	const usage = {
 		template: `
-			<div class="wrapper">
+			<app class="wrapper">
 				<test-component><div v-if="show">A</div></test-component>
-			</div>
+			</app>
 		`,
 		components: {
 			TestComponent,
@@ -746,8 +749,8 @@ test('v-if slot', async () => {
 		},
 	};
 
-	const empty = '<div class="wrapper">\n  <!---->\n</div>';
-	const ifTrue = '<div class="wrapper">\n  <div>A</div>\n</div>';
+	const empty = '<app class="wrapper">\n  <!---->\n</app>';
+	const ifTrue = '<app class="wrapper">\n  <div>A</div>\n</app>';
 
 	const wrapper = mount(usage);
 	expect(wrapper.html()).toBe(empty);
@@ -768,7 +771,7 @@ test('v-if slot', async () => {
 // #27
 test('transition - swapping components', async () => {
 	const ChildA = {
-		template: '<div v-frag>1a</div>',
+		template: '<frag v-frag>1a</frag>',
 		directives: {
 			frag,
 		},
@@ -780,13 +783,13 @@ test('transition - swapping components', async () => {
 
 	const usage = {
 		template: `
-			<div>
+			<app>
 				<transition :css="false">
 					<child-a v-if="showA" />
 					<child-b v-else />
 				</transition>
 				2
-			</div>
+			</app>
 		`,
 		components: {
 			ChildA,
@@ -806,10 +809,10 @@ test('transition - swapping components', async () => {
 		},
 	});
 
-	expect(wrapper.html()).toBe('<div>1a\n  2\n</div>');
+	expect(wrapper.html()).toBe('<app>1a\n  2\n</app>');
 
 	await wrapper.setData({ showA: false });
-	expect(wrapper.html()).toBe('<div>\n  <div>1b</div>\n  2\n</div>');
+	expect(wrapper.html()).toBe('<app>\n  <div>1b</div>\n  2\n</app>');
 });
 
 test('transition - frag to element', async () => {
@@ -820,13 +823,13 @@ test('transition - frag to element', async () => {
 			};
 		},
 		template: `
-		<div>
+		<app>
 			<transition :css="false">
 				<span v-if="showA" v-frag key="a">1a</span>
 				<span v-else key="b">1b</span>
 			</transition>
 			2
-		</div>
+		</app>
 		`,
 		directives: {
 			frag,
@@ -840,16 +843,16 @@ test('transition - frag to element', async () => {
 		},
 	});
 
-	expect(wrapper.html()).toBe('<div>1a\n  2\n</div>');
+	expect(wrapper.html()).toBe('<app>1a\n  2\n</app>');
 
 	await wrapper.setData({ showA: false });
-	expect(wrapper.html()).toBe('<div><span>1b</span>\n  2\n</div>');
+	expect(wrapper.html()).toBe('<app><span>1b</span>\n  2\n</app>');
 });
 
 // #16
-test('updating sibling node', async () => {
+test('updating sibling node - update', async () => {
 	const Child = {
-		template: '<div v-frag v-if="show">Child</div>',
+		template: '<frag v-frag v-if="show">Child</frag>',
 		props: ['show'],
 		directives: {
 			frag,
@@ -859,7 +862,7 @@ test('updating sibling node', async () => {
 	const usage = {
 		// Important that this is in one-line
 		// When breaking into multiple lines, it inserts a textNode in between and breaks reproduction
-		template: '<div><child :show="isVisible" /><span v-if="isVisible" /></div>',
+		template: '<app><child :show="isVisible" /><span v-if="isVisible" /></app>',
 
 		components: {
 			Child,
@@ -874,15 +877,71 @@ test('updating sibling node', async () => {
 
 	const wrapper = mount(usage);
 
-	expect(wrapper.html()).toBe('<div>Child<span></span></div>');
+	expect(wrapper.html()).toBe('<app>Child<span></span></app>');
 
 	wrapper.setData({ isVisible: false });
 	await wrapper.vm.$nextTick();
 
-	expect(wrapper.html()).toBe('<div>\n  <!---->\n  <!---->\n</div>');
+	expect(wrapper.html()).toBe('<app>\n  <!---->\n  <!---->\n</app>');
 
 	wrapper.setData({ isVisible: true });
 	await wrapper.vm.$nextTick();
 
-	expect(wrapper.html()).toBe('<div>Child<span></span></div>');
+	expect(wrapper.html()).toBe('<app>Child<span></span></app>');
+});
+
+// #16 2
+test('updating sibling node - removal', async () => {
+	const Child = {
+		template: '<frag v-frag v-if="show">Child</frag>',
+		props: ['show'],
+		directives: {
+			frag,
+		},
+	};
+
+	const usage = {
+		// Important that this is in one-line
+		// When breaking into multiple lines, it inserts a textNode in between and breaks reproduction
+		template: '<app><child :show="isVisible" /><child :show="isVisible" /></app>',
+
+		components: {
+			Child,
+		},
+
+		data() {
+			return {
+				isVisible: false,
+			};
+		},
+	};
+
+	const wrapper = mount(usage);
+
+	expect(wrapper.html()).toBe('<app>\n  <!---->\n  <!---->\n</app>');
+
+	wrapper.setData({ isVisible: true });
+	await wrapper.vm.$nextTick();
+
+	expect(wrapper.html()).toBe('<app>ChildChild</app>');
+
+	wrapper.setData({ isVisible: false });
+	await wrapper.vm.$nextTick();
+
+	expect(wrapper.html()).toBe('<app>\n  <!---->\n  <!---->\n</app>');
+
+	wrapper.setData({ isVisible: true });
+	await wrapper.vm.$nextTick();
+
+	expect(wrapper.html()).toBe('<app>ChildChild</app>');
+
+	wrapper.setData({ isVisible: false });
+	await wrapper.vm.$nextTick();
+
+	expect(wrapper.html()).toBe('<app>\n  <!---->\n  <!---->\n</app>');
+
+	wrapper.setData({ isVisible: true });
+	await wrapper.vm.$nextTick();
+
+	expect(wrapper.html()).toBe('<app>ChildChild</app>');
 });
