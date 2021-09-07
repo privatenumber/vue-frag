@@ -857,6 +857,8 @@ test('updating sibling node', async () => {
 	};
 
 	const usage = {
+		// Important that this is in one-line
+		// When breaking into multiple lines, it inserts a textNode in between and breaks reproduction
 		template: '<div><child :show="isVisible" /><span v-if="isVisible" /></div>',
 
 		components: {
