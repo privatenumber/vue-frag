@@ -7,6 +7,15 @@ const rollupConfig = {
 	plugins: [
 		babel(),
 		filesize(),
+
+		// Strip comments
+		terser({
+			compress: false,
+			mangle: false,
+			format: {
+				beautify: true,
+			},
+		}),
 	],
 	output: [
 		{
