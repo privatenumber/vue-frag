@@ -4,6 +4,16 @@ const $fakeNextSiblingBackReference = Symbol();
 const $fakeChildren = Symbol();
 const $placeholder = Symbol();
 
+function addId(element) {
+	if (element) {
+		if (!('_id' in element)) {
+			const id = Math.trunc(Math.random() * 100);
+			element._id = [id, element.nodeName].join('-');
+		}
+		return element._id;
+	}
+}
+
 function setFakeParent(node, fakeParent) {
 	if (!node[$fakeParent]) {
 		node[$fakeParent] = fakeParent;
@@ -163,11 +173,14 @@ const elementPatches = {
 
 const frag = {
 	inserted(element) {
+		console.log('v-frag -- inserted', addId(element));
+
 		// At inserted, we want to remove the element,
 		// and insert its children in place of it
 		const {
 			parentNode,
 			nextSibling,
+			previousSibling,
 		} = element;
 		const childNodes = Array.from(element.childNodes);
 		element.frag = childNodes;
@@ -192,6 +205,10 @@ const frag = {
 			setFakeNextSibling(element, nextSibling);
 		}
 
+		if (previousSibling) {
+			setFakeNextSibling(previousSibling, element);
+		}
+
 		childNodes.forEach(node => setFakeParent(node, element));
 
 		// Handle v-html
@@ -214,6 +231,8 @@ const frag = {
 	},
 
 	unbind(element) {
+		console.log('v-frag -- unbind', addId(element));
+
 		resetChildren(element.frag, element);
 		element[$placeholder].remove();
 
