@@ -82,11 +82,26 @@ function insertBefore(insertNode, insertBeforeNode) {
 			setFakeNextSibling(fragBefore, insertNodes[0]);
 			insertBeforeNode[$fakeNextSiblingBackReference] = undefined;
 		}
+
+		// If the reference the node is getting inserted before is a frag child
+		// mock the nextSibling to point to the frag parent
+		if (insertBeforeNode[$fakeParent]) {
+			const lastNode = insertNodes[insertNodes.length - 1];
+			console.log('setFakeSibling', addId(lastNode), addId(insertBeforeNode), '=>', addId(insertBeforeNode[$fakeParent]));
+			setFakeNextSibling(
+				lastNode,
+				insertBeforeNode[$fakeParent],
+			);
+		}
 	} else {
 		this.append(...insertNodes);
 	}
 
-	insertNodes.forEach(node => setFakeParent(node, this));
+	insertNodes.forEach((node) => {
+		if (node.parentNode !== this) {
+			setFakeParent(node, this);
+		}
+	});
 }
 
 function removeChild(node) {
@@ -104,6 +119,12 @@ function removeChild(node) {
 		}
 	}
 
+	if (node[$fakeNextSiblingBackReference]) {
+		const fragBefore = node[$fakeNextSiblingBackReference];
+		setFakeNextSibling(fragBefore, node[$fakeNextSibling] || node.nextSibling);
+		node[$fakeNextSiblingBackReference] = undefined;
+	}
+
 	const fc = this[$fakeChildren];
 	if (fc) {
 		const hasFakeChildren = fc.get(node);
@@ -113,13 +134,6 @@ function removeChild(node) {
 			node[$fakeParent] = undefined;
 			return;
 		}
-	}
-
-	if (node[$fakeNextSiblingBackReference]) {
-		const fragBefore = node[$fakeNextSiblingBackReference];
-
-		setFakeNextSibling(fragBefore, node.nextSibling);
-		node[$fakeNextSiblingBackReference] = undefined;
 	}
 
 	node.remove();
