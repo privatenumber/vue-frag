@@ -3,16 +3,6 @@ const $fakeNextSibling = Symbol();
 const $fakeChildren = Symbol();
 const $placeholder = Symbol();
 
-function addId(element) {
-	if (element) {
-		if (!('_id' in element)) {
-			const id = Math.trunc(Math.random() * 100);
-			element._id = [id, element.nodeName].join('-');
-		}
-		return element._id;
-	}
-}
-
 function setFakeParent(node, fakeParent) {
 	if (!node[$fakeParent]) {
 		node[$fakeParent] = fakeParent;
@@ -37,9 +27,7 @@ function setFakeNextSibling(node) {
 				const lastFakeChild = this.frag[this.frag.length - 1];
 
 				if (lastFakeChild) {
-					console.log('lastFakeChild', addId(lastFakeChild));
 					nextSibling = lastFakeChild.nextSibling;
-					console.log('lastFakeChild.nextSibling', addId(nextSibling));
 				}
 			} else {
 				const childIndex = Array.from(this.parentElement.childNodes).indexOf(this);
@@ -188,8 +176,6 @@ const elementPatches = {
 
 const frag = {
 	inserted(element) {
-		console.log('v-frag -- inserted', addId(element));
-
 		// At inserted, we want to remove the element,
 		// and insert its children in place of it
 		const {
@@ -246,8 +232,6 @@ const frag = {
 	},
 
 	unbind(element) {
-		console.log('v-frag -- unbind', addId(element));
-
 		resetChildren(element.frag, element);
 		element[$placeholder].remove();
 

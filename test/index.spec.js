@@ -1065,3 +1065,50 @@ test('updating sibling node - insertion - placeholder before frag-child should b
 
 	expect(wrapper.html()).toBe('<app>ChildChild</app>');
 });
+
+// #16 6
+test('updating sibling node - insertion', async () => {
+	const Child = {
+		template: '<frag v-frag v-if="show">Child</frag>',
+		props: ['show'],
+		directives: {
+			frag,
+		},
+	};
+
+	const usage = {
+		// Important that this is in one-line
+		// When breaking into multiple lines, it inserts a textNode in between and breaks reproduction
+		template: '<app><child :show="isVisibleA" /><child :show="isVisibleB" /></app>',
+
+		components: {
+			Child,
+		},
+
+		data() {
+			return {
+				isVisibleA: true,
+				isVisibleB: true,
+			};
+		},
+	};
+
+	const wrapper = mount(usage);
+
+	expect(wrapper.html()).toBe('<app>ChildChild</app>');
+
+	wrapper.setData({ isVisibleB: false });
+	await wrapper.vm.$nextTick();
+
+	expect(wrapper.html()).toBe('<app>Child\n  <!---->\n</app>');
+
+	wrapper.setData({ isVisibleA: false });
+	await wrapper.vm.$nextTick();
+
+	expect(wrapper.html()).toBe('<app>\n  <!---->\n  <!---->\n</app>');
+
+	wrapper.setData({ isVisibleA: true });
+	await wrapper.vm.$nextTick();
+
+	expect(wrapper.html()).toBe('<app>Child\n  <!---->\n</app>');
+});
