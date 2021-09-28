@@ -62,7 +62,11 @@ const resetChildren = (frag, moveTo) => {
 
 function insertBefore(insertNode, insertBeforeNode) {
 	const insertNodes = insertNode.frag || [insertNode];
-
+	
+	if(insertBeforeNode.frag){
+		insertBeforeNode = insertBeforeNode.frag[0]; 
+	}
+	
 	// If this element is a fragment, insert nodes in virtual fragment
 	if (this.frag) {
 		const index = this.frag.indexOf(insertBeforeNode);
@@ -71,13 +75,27 @@ function insertBefore(insertNode, insertBeforeNode) {
 		}
 	}
 
-	//  If this element has fake children, and targetNode is a fragmentNode
-	if (this[$fakeChildren]) {
-		const hasFakeChildren = this[$fakeChildren].get(insertBeforeNode);
-		if (hasFakeChildren) {
-			[insertBeforeNode] = hasFakeChildren; // update target with first child of fragment
+	//  If nested fragment update insertNodes to parent frag
+    let parent = this[$fakeParent];
+	while(parent){
+		if (parent.frag) {
+			const index = parent.frag.indexOf(insertBeforeNode);
+			if (index > -1) {
+				parent.frag.splice(index, 0, ...insertNodes);
+			}
+		}else{
+			break;
 		}
+		parent = parent[$fakeParent]
 	}
+
+	//  If this element has fake children, and targetNode is a fragmentNode
+	// if (this[$fakeChildren]) {
+	// 	const hasFakeChildren = this[$fakeChildren].get(insertBeforeNode);
+	// 	if (hasFakeChildren) {
+	// 		[insertBeforeNode] = hasFakeChildren; // update target with first child of fragment
+	// 	}
+	// }
 
 	if (insertBeforeNode) {
 		insertBeforeNode.before(...insertNodes);
@@ -101,9 +119,15 @@ function insertBefore(insertNode, insertBeforeNode) {
 
 function removeChild(node) {
 	if (this.frag) {
-		const nodeIndex = this.frag.indexOf(node);
+		let fragNodeLen = 1;
+		let fragFirstNode = node;
+		if(node.frag){
+			fragNodeLen = node.frag.length;
+			fragFirstNode = node.frag[0];
+		}
+		const nodeIndex = this.frag.indexOf(fragFirstNode);
 		if (nodeIndex > -1) {
-			const spliceArguments = [nodeIndex, 1];
+			const spliceArguments = [nodeIndex, fragNodeLen];
 			if (this.frag.length === 1) {
 				const placeholder = this[$placeholder];
 				this.frag[0].before(placeholder);
@@ -116,7 +140,7 @@ function removeChild(node) {
 
 	const fc = this[$fakeChildren];
 	if (fc) {
-		const hasFakeChildren = fc.get(node);
+		const hasFakeChildren = node.frag;
 		if (hasFakeChildren) {
 			resetChildren(hasFakeChildren, node);
 			fc.delete(node);
@@ -140,6 +164,13 @@ function patchParentMethods(parent, child, nodes) {
 	}
 
 	parent[$fakeChildren].set(child, nodes);
+	
+	if(parent.frag){ // Keep frag list is real node
+		let nodeIndex = parent.frag.indexOf(child);
+		if(nodeIndex > -1){
+			parent.frag.splice(nodeIndex, 1, ...nodes);
+		}
+	}
 }
 
 const elementPatches = {
