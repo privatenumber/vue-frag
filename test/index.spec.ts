@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import { mount } from '@vue/test-utils';
-import frag from '../dist/frag.js';
+import frag from '../src/frag';
 
 Vue.config.ignoredElements = ['app', 'frag'];
 

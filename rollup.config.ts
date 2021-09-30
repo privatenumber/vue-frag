@@ -2,11 +2,20 @@ import babel from '@rollup/plugin-babel';
 import { terser } from 'rollup-plugin-terser';
 import filesize from 'rollup-plugin-filesize';
 
+const babelPlugin = babel({
+	extensions: ['.ts'],
+	babelHelpers: 'bundled',
+	presets: [
+		['@babel/preset-env', {
+			loose: true,
+		}],
+	],
+});
+
 const rollupConfig = {
-	input: 'src/frag.js',
+	input: 'src/frag.ts',
 	plugins: [
-		babel(),
-		filesize(),
+		babelPlugin,
 
 		// Strip comments
 		terser({
@@ -16,6 +25,8 @@ const rollupConfig = {
 				beautify: true,
 			},
 		}),
+
+		filesize(),
 	],
 	output: [
 		{
@@ -37,9 +48,10 @@ const rollupConfig = {
 };
 
 const rollupConfigMin = {
-	input: 'src/frag.js',
+	input: 'src/frag.ts',
 	plugins: [
-		babel(),
+		babelPlugin,
+
 		terser(),
 	],
 	output: [
@@ -61,4 +73,7 @@ const rollupConfigMin = {
 	],
 };
 
-export default [rollupConfig, rollupConfigMin];
+export default [
+	rollupConfig,
+	rollupConfigMin,
+];
