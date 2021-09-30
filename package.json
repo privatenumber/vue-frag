@@ -33,25 +33,26 @@
 		}
 	},
 	"lint-staged": {
-		"*.ts": [
+		"*.{js,ts}": [
 			"eslint --fix",
 			"jest --bail --findRelatedTests"
 		]
 	},
 	"devDependencies": {
+		"@babel/preset-env": "^7.15.6",
 		"@pvtnbr/eslint-config": "^0.2.1",
+		"@rollup/plugin-babel": "^5.3.0",
 		"@types/jest": "^27.0.2",
 		"@vue/server-test-utils": "^1.1.4",
 		"@vue/test-utils": "^1.1.4",
-		"es-jest": "^1.2.0",
-		"esbuild": "^0.13.3",
+		"es-jest": "^1.3.0",
 		"eslint": "^7.19.0",
 		"husky": "^4.3.8",
 		"jest": "^26.6.3",
 		"lint-staged": "^10.5.4",
 		"rollup": "^2.57.0",
-		"rollup-plugin-esbuild": "^4.5.0",
 		"rollup-plugin-filesize": "^9.1.0",
+		"rollup-plugin-terser": "^7.0.2",
 		"typescript": "^4.4.3",
 		"vue": "^2.6.12",
 		"vue-server-renderer": "^2.6.12",
