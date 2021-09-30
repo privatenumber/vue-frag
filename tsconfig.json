@@ -1,6 +1,8 @@
 {
-	"compilerOptions": {
-		
-	},
-	"include": ["src"]
+	"compilerOptions": {},
+	"include": [
+		"src",
+		"test",
+		"rollup.config.ts"
+	]
 }
