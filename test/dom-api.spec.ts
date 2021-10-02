@@ -1,38 +1,19 @@
-import Vue, { ComponentOptions } from 'vue';
-import VueCommon from 'vue/dist/vue.common';
+import Vue from 'vue';
 import { mount } from '@vue/test-utils';
-import { defineComponent } from '@vue/composition-api';
 import outdent from 'outdent';
 import frag from '../src/frag';
-import { serializeDOMTree, createMountTarget } from './utils';
+import {
+	dualMount,
+	createNonFragApp,
+	serializeDOMTree,
+	createMountTarget,
+} from './utils';
 
 Vue.config.ignoredElements = [/./];
 
-type VueComponent = ComponentOptions<Vue>;
-function createNonFragApp<Component extends VueComponent>(fragComponent: Component) {
-	let components: VueComponent['components'] = undefined;
-
-	if (fragComponent.components) {
-		components = {
-			...fragComponent.components,
-		};
-
-		for (const componentName in components) {
-			components[componentName] = createNonFragApp(components[componentName] as Component);
-		}
-	}
-
-	return {
-		...fragComponent,
-		template: fragComponent.template?.replace(/v-frag/g, ''),
-		components,
-	};
-}
-
-
 test('Basic usage', () => {
 	const FragComponent = {
-		template: `<frag v-frag>asdf</frag>`,
+		template: `<frag v-frag>hello</frag>`,
 		directives: {
 			frag,
 		},
@@ -45,14 +26,10 @@ test('Basic usage', () => {
 		},
 	};
 
-	const normalAppWrapper = mount(createNonFragApp(fragApp));
-	const fragAppWrapper = mount(fragApp);
+	const wrapper = dualMount(fragApp);
 
-	expect(serializeDOMTree(fragAppWrapper.element)).toBe(
-		serializeDOMTree(normalAppWrapper.element)
-	);	
-
-	expect(fragAppWrapper.html()).toBe(`<app>asdf</app>`);
+	wrapper.expectMatchingDom();
+	expect(wrapper.frag.html()).toBe('<app>hello</app>');
 });
 
 
@@ -104,14 +81,10 @@ test('With root app', () => {
 		},
 	};
 
-	const normalAppWrapper = mount(createNonFragApp(fragApp));
-	const fragAppWrapper = mount(fragApp);
+	const wrapper = dualMount(fragApp);
 
-	expect(serializeDOMTree(fragAppWrapper.element)).toBe(
-		serializeDOMTree(normalAppWrapper.element)
-	);
-
-	expect(fragAppWrapper.html()).toBe(outdent`
+	wrapper.expectMatchingDom();
+	expect(wrapper.frag.html()).toBe(outdent`
 	<app>
 	  <child-a></child-a>
 	  <child-b></child-b>
@@ -137,14 +110,10 @@ test('Deep nested tree', () => {
 		},
 	};
 
-	const normalAppWrapper = mount(createNonFragApp(fragApp));
-	const fragAppWrapper = mount(fragApp);
+	const wrapper = dualMount(fragApp);
 
-	expect(serializeDOMTree(fragAppWrapper.element)).toBe(
-		serializeDOMTree(normalAppWrapper.element)
-	);
-
-	expect(fragAppWrapper.html()).toBe(outdent`
+	wrapper.expectMatchingDom();
+	expect(wrapper.frag.html()).toBe(outdent`
 	<app>
 	  <child-d></child-d>
 	</app>
@@ -171,14 +140,10 @@ test('horizontal tree', () => {
 		},
 	};
 
-	const normalAppWrapper = mount(createNonFragApp(fragApp));
-	const fragAppWrapper = mount(fragApp);
+	const wrapper = dualMount(fragApp);
 
-	expect(serializeDOMTree(fragAppWrapper.element)).toBe(
-		serializeDOMTree(normalAppWrapper.element)
-	);
-
-	expect(fragAppWrapper.html()).toBe(outdent`
+	wrapper.expectMatchingDom();
+	expect(wrapper.frag.html()).toBe(outdent`
 	<app>
 	  <child-a></child-a>
 	  <child-b></child-b>
@@ -187,52 +152,41 @@ test('horizontal tree', () => {
 	`);
 });
 
-test('Parent v-if', async () => {
+test('v-for template', async () => {
 	const FragComponent = {
-		template: '<frag v-frag>Hello world</frag>',
+		template: '<frag v-frag><template v-for="i in num">{{ i }}</template></frag>',
 		directives: {
 			frag,
 		},
+		props: ['num'],
 	};
 
-	const fragApp = {
-		template: '<app><frag-component v-if="show" /></app>',
+	const usage = {
+		template: '<app><frag-component :num="num" /></app>',
 		components: {
 			FragComponent,
 		},
 		data() {
 			return {
-				show: true,
+				num: 0,
 			};
 		},
 	};
 
-	const normalAppWrapper = mount(createNonFragApp(fragApp));
-	const fragAppWrapper = mount(fragApp);
+	const tpl = (content: string) => `<app>${content}</app>`;
 
-	expect(fragAppWrapper.html()).toBe('<app>Hello world</app>');
+	const wrapper = dualMount(usage);
 
-	expect(serializeDOMTree(fragAppWrapper.element)).toBe(
-		serializeDOMTree(normalAppWrapper.element)
-	);
+	expect(wrapper.frag.html()).toBe(tpl('\n  <!---->\n'));
+	// wrapper.expectMatchingDom();
 
-	normalAppWrapper.setData({ show: false });
-	await fragAppWrapper.setData({ show: false });
-	expect(fragAppWrapper.html()).toBe(outdent`
-	<app>
-	  <!---->
-	</app>
-	`);
+	// await wrapper.setData({ num: 1 });
+	// expect(wrapper.frag.html()).toBe(tpl('1'));
 
-	expect(serializeDOMTree(fragAppWrapper.element)).toBe(
-		serializeDOMTree(normalAppWrapper.element)
-	);
+	// await wrapper.setData({ num: 2 });
+	// expect(wrapper.frag.html()).toBe(tpl('12'));
 
-	normalAppWrapper.setData({ show: true });
-	await fragAppWrapper.setData({ show: true });
-	expect(fragAppWrapper.html()).toBe('<app>Hello world</app>');
-
-	expect(serializeDOMTree(fragAppWrapper.element)).toBe(
-		serializeDOMTree(normalAppWrapper.element)
-	);
+	// await wrapper.setData({ num: 3 });
+	// expect(wrapper.frag.html()).toBe(tpl('123'));
 });
+

@@ -1,10 +1,15 @@
 import Vue from 'vue';
 import { mount } from '@vue/test-utils';
 import frag from '../src/frag';
-import { createMountTarget } from './utils';
 import type { Component, ComponentOptions } from 'vue';
 import { defineComponent } from '@vue/composition-api';
 import outdent from 'outdent';
+import {
+	dualMount,
+	createNonFragApp,
+	serializeDOMTree,
+	createMountTarget,
+} from './utils';
 
 Vue.config.ignoredElements = ['app', 'frag'];
 
@@ -50,7 +55,7 @@ test('Nested frags', async () => {
 });
 
 test('v-html', async () => {
-	const TestComponent = defineComponent({
+	const FragComponent = defineComponent({
 		template: '<frag v-frag v-html="code" />',
 		directives: {
 			frag,
@@ -69,9 +74,9 @@ test('v-html', async () => {
 	});
 
 	const usage = {
-		template: '<app><test-component :num="num"/></app>',
+		template: '<app><frag-component :num="num"/></app>',
 		components: {
-			TestComponent,
+			FragComponent,
 		},
 		data() {
 			return {
@@ -107,7 +112,7 @@ test('v-html', async () => {
 
 describe('Reactivity', () => {
 	test('Data', async () => {
-		const TestComponent = {
+		const FragComponent = {
 			template: `
 				<frag v-frag>Hello world {{ number }}</frag>
 			`,
@@ -119,10 +124,10 @@ describe('Reactivity', () => {
 
 		const usage = {
 			template: `
-				<app><test-component :number="number" /></app>
+				<app><frag-component :number="number" /></app>
 			`,
 			components: {
-				TestComponent,
+				FragComponent,
 			},
 			data() {
 				return {
@@ -131,11 +136,13 @@ describe('Reactivity', () => {
 			},
 		};
 
-		const wrapper = mount(usage);
+		const wrapper = dualMount(usage);
+
 		const number = Date.now();
 		await wrapper.setData({ number });
 
-		expect(wrapper.html()).toBe(`<app>Hello world ${number}</app>`);
+		expect(wrapper.frag.html()).toBe(`<app>Hello world ${number}</app>`);
+		wrapper.expectMatchingDom();
 	});
 
 	test('v-if template', async () => {
@@ -165,21 +172,25 @@ describe('Reactivity', () => {
 
 		const ifTrue = '<app>A</app>';
 
-		const wrapper = mount(usage);
-		expect(wrapper.html()).toBe(empty);
+		const wrapper = dualMount(usage);
+		expect(wrapper.frag.html()).toBe(empty);
+		wrapper.expectMatchingDom();
 
 		await wrapper.setData({ show: true });
-		expect(wrapper.html()).toBe(ifTrue);
+		expect(wrapper.frag.html()).toBe(ifTrue);
+		wrapper.expectMatchingDom();
 
 		await wrapper.setData({ show: false });
-		expect(wrapper.html()).toBe(empty);
+		expect(wrapper.frag.html()).toBe(empty);
+		wrapper.expectMatchingDom();
 
 		await wrapper.setData({ show: true });
-		expect(wrapper.html()).toBe(ifTrue);
+		expect(wrapper.frag.html()).toBe(ifTrue);
+		wrapper.expectMatchingDom();
 	});
 
 	test('v-if element', async () => {
-		const TestComponent = {
+		const FragComponent = {
 			template: `
 				<frag v-frag>
 					<div v-if="show">A</div>
@@ -194,11 +205,11 @@ describe('Reactivity', () => {
 		const usage = {
 			template: `
 				<app class="wrapper">
-					<test-component :show="show" />
+					<frag-component :show="show" />
 				</app>
 			`,
 			components: {
-				TestComponent,
+				FragComponent,
 			},
 			data() {
 				return {
@@ -219,21 +230,25 @@ describe('Reactivity', () => {
 		</app>
 		`;
 
-		const wrapper = mount(usage);
-		expect(wrapper.html()).toBe(empty);
+		const wrapper = dualMount(usage);
+		expect(wrapper.frag.html()).toBe(empty);
+		wrapper.expectMatchingDom();
 
 		await wrapper.setData({ show: true });
-		expect(wrapper.html()).toBe(ifTrue);
+		expect(wrapper.frag.html()).toBe(ifTrue);
+		wrapper.expectMatchingDom();
 
 		await wrapper.setData({ show: false });
-		expect(wrapper.html()).toBe(empty);
+		expect(wrapper.frag.html()).toBe(empty);
+		wrapper.expectMatchingDom();
 
 		await wrapper.setData({ show: true });
-		expect(wrapper.html()).toBe(ifTrue);
+		expect(wrapper.frag.html()).toBe(ifTrue);
+		wrapper.expectMatchingDom();
 	});
 
 	test('v-for template', async () => {
-		const TestComponent = {
+		const FragComponent = {
 			template: '<frag v-frag><template v-for="i in num">{{ i }}</template></frag>',
 			directives: {
 				frag,
@@ -242,9 +257,9 @@ describe('Reactivity', () => {
 		};
 
 		const usage = {
-			template: '<app><test-component :num="num" /></app>',
+			template: '<app><frag-component :num="num" /></app>',
 			components: {
-				TestComponent,
+				FragComponent,
 			},
 			data() {
 				return {
@@ -255,21 +270,22 @@ describe('Reactivity', () => {
 
 		const tpl = (content: string) => `<app>${content}</app>`;
 
-		const wrapper = mount(usage);
-		expect(wrapper.html()).toBe(tpl('\n  <!---->\n'));
+		const wrapper = dualMount(usage);
+
+		expect(wrapper.frag.html()).toBe(tpl('\n  <!---->\n'));
 
 		await wrapper.setData({ num: 1 });
-		expect(wrapper.html()).toBe(tpl('1'));
+		expect(wrapper.frag.html()).toBe(tpl('1'));
 
 		await wrapper.setData({ num: 2 });
-		expect(wrapper.html()).toBe(tpl('12'));
+		expect(wrapper.frag.html()).toBe(tpl('12'));
 
 		await wrapper.setData({ num: 3 });
-		expect(wrapper.html()).toBe(tpl('123'));
+		expect(wrapper.frag.html()).toBe(tpl('123'));
 	});
 
 	test('v-for element', async () => {
-		const TestComponent = {
+		const FragComponent = {
 			template: `
 				<frag v-frag>
 					<div v-for="i in num">{{ i }}</div>
@@ -284,11 +300,11 @@ describe('Reactivity', () => {
 		const usage = {
 			template: `
 				<app>
-					<test-component :num="num" />
+					<frag-component :num="num" />
 				</app>
 			`,
 			components: {
-				TestComponent,
+				FragComponent,
 			},
 			data() {
 				return {
@@ -315,7 +331,7 @@ describe('Reactivity', () => {
 	});
 
 	test('slot w/ v-if', async () => {
-		const TestComponent = {
+		const FragComponent = {
 			template: `
 				<frag v-frag>
 					<template v-if="show">{{ name }}</template>
@@ -331,13 +347,13 @@ describe('Reactivity', () => {
 		const usage = {
 			template: `
 				<app class="wrapper">
-					<test-component name="A" :show="show">
-						<test-component name="B" :show="show" />
-					</test-component>
+					<frag-component name="A" :show="show">
+						<frag-component name="B" :show="show" />
+					</frag-component>
 				</app>
 			`,
 			components: {
-				TestComponent,
+				FragComponent,
 			},
 			data() {
 				return {
@@ -368,7 +384,7 @@ describe('Reactivity', () => {
 	});
 
 	test('slot w/ v-for', async () => {
-		const TestComponent = {
+		const FragComponent = {
 			template: `
 				<frag v-frag>
 					<div v-for="i in num">{{ name }} {{ i }}</div>
@@ -384,16 +400,16 @@ describe('Reactivity', () => {
 		const usage = {
 			template: `
 				<app>
-					<test-component name="A" :num="num">
-						<test-component name="B" :num="num">
-							<test-component name="C" :num="num" />
-							</test-component>
-						</test-component>
-					</test-component>
+					<frag-component name="A" :num="num">
+						<frag-component name="B" :num="num">
+							<frag-component name="C" :num="num" />
+							</frag-component>
+						</frag-component>
+					</frag-component>
 				</app>
 			`,
 			components: {
-				TestComponent,
+				FragComponent,
 			},
 			data() {
 				return {
@@ -421,17 +437,17 @@ describe('Reactivity', () => {
 });
 
 test('Parent v-if', async () => {
-	const TestComponent = {
+	const FragComponent = {
 		template: '<frag v-frag>Hello world</frag>',
 		directives: {
 			frag,
 		},
 	};
 
-	const usage = {
-		template: '<app><test-component v-if="show" /></app>',
+	const fragApp = {
+		template: '<app><frag-component v-if="show" /></app>',
 		components: {
-			TestComponent,
+			FragComponent,
 		},
 		data() {
 			return {
@@ -440,24 +456,26 @@ test('Parent v-if', async () => {
 		},
 	};
 
-	const wrapper = mount(usage);
-	expect(wrapper.html()).toBe('<app>Hello world</app>');
+	const wrapper = dualMount(fragApp);
+
+	expect(wrapper.frag.html()).toBe('<app>Hello world</app>');
+	wrapper.expectMatchingDom();
 
 	await wrapper.setData({ show: false });
-
-	expect(wrapper.html()).toBe(outdent`
+	expect(wrapper.frag.html()).toBe(outdent`
 	<app>
 	  <!---->
 	</app>
 	`);
+	wrapper.expectMatchingDom();
 
 	await wrapper.setData({ show: true });
-
-	expect(wrapper.html()).toBe('<app>Hello world</app>');
+	expect(wrapper.frag.html()).toBe('<app>Hello world</app>');
+	wrapper.expectMatchingDom();
 });
 
 test('Parent multiple v-if', async () => {
-	const TestComponent = {
+	const FragComponent = {
 		template: '<frag v-frag><div>Hello world {{ name }}</div></frag>',
 		directives: {
 			frag,
@@ -468,13 +486,13 @@ test('Parent multiple v-if', async () => {
 	const usage = {
 		template: `
 			<app>
-				<test-component name="A" key="a" v-if="show" />
-				<test-component name="B" key="b" v-if="!show"/>
-				<test-component name="C" key="c" v-if="show" />
+				<frag-component name="A" key="a" v-if="show" />
+				<frag-component name="B" key="b" v-if="!show"/>
+				<frag-component name="C" key="c" v-if="show" />
 			</app>
 		`,
 		components: {
-			TestComponent,
+			FragComponent,
 		},
 		data() {
 			return {
@@ -483,8 +501,9 @@ test('Parent multiple v-if', async () => {
 		},
 	};
 
-	const wrapper = mount(usage);
-	expect(wrapper.html()).toBe(outdent`
+	const wrapper = dualMount(usage);
+
+	expect(wrapper.frag.html()).toBe(outdent`
 	<app>
 	  <div>Hello world A</div>
 	  <!---->
@@ -494,7 +513,7 @@ test('Parent multiple v-if', async () => {
 
 	await wrapper.setData({ show: false });
 
-	expect(wrapper.html()).toBe(outdent`
+	expect(wrapper.frag.html()).toBe(outdent`
 	<app>
 	  <!---->
 	  <div>Hello world B</div>
@@ -504,7 +523,7 @@ test('Parent multiple v-if', async () => {
 
 	await wrapper.setData({ show: true });
 
-	expect(wrapper.html()).toBe(outdent`
+	expect(wrapper.frag.html()).toBe(outdent`
 	<app>
 	  <div>Hello world A</div>
 	  <!---->

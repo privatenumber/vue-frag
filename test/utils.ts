@@ -1,3 +1,6 @@
+import { mount } from '@vue/test-utils';
+import Vue, { ComponentOptions } from 'vue';
+
 function bfs(rootNode: Node) {
 	const queue = [rootNode];
 	const allNodes: Node[] = [];
@@ -55,4 +58,46 @@ export function createMountTarget() {
 	const mountTarget = document.createElement('div');
 	document.body.append(mountTarget);
 	return mountTarget;
+}
+
+export function createNonFragApp<V extends Vue>(fragComponent: ComponentOptions<V>) {
+	type Component = ComponentOptions<V>;
+	let components: Component['components'] = undefined;
+
+	if (fragComponent.components) {
+		components = {
+			...fragComponent.components,
+		};
+
+		for (const componentName in components) {
+			components[componentName] = createNonFragApp(components[componentName] as Component);
+		}
+	}
+
+	return {
+		...fragComponent,
+		template: fragComponent.template?.replace(/ v-frag/g, ''),
+		components,
+	};
+}
+
+export function dualMount<V extends Vue>(component: ComponentOptions<V>) {
+	const normal = mount(createNonFragApp(component));
+	const frag = mount(component);
+
+	return {
+		frag,
+		normal,
+		setData(data: object) {
+			return Promise.all([
+				normal.setData(data),
+				frag.setData(data),
+			]);
+		},
+		expectMatchingDom() {
+			expect(serializeDOMTree(frag.element)).toBe(
+				serializeDOMTree(normal.element)
+			);
+		},
+	};
 }
