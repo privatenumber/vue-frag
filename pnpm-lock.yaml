@@ -2,9 +2,11 @@ lockfileVersion: 5.3
 
 specifiers:
   '@babel/preset-env': ^7.15.6
+  '@babel/preset-typescript': ^7.15.0
   '@pvtnbr/eslint-config': ^0.2.1
   '@rollup/plugin-babel': ^5.3.0
   '@types/jest': ^27.0.2
+  '@vue/composition-api': ^1.2.2
   '@vue/server-test-utils': ^1.1.4
   '@vue/test-utils': ^1.1.4
   es-jest: ^1.3.0
@@ -12,6 +14,7 @@ specifiers:
   husky: ^4.3.8
   jest: ^26.6.3
   lint-staged: ^10.5.4
+  outdent: ^0.8.0
   rollup: ^2.57.0
   rollup-plugin-filesize: ^9.1.0
   rollup-plugin-terser: ^7.0.2
@@ -22,9 +25,11 @@ specifiers:
 
 devDependencies:
   '@babel/preset-env': 7.15.6
+  '@babel/preset-typescript': 7.15.0
   '@pvtnbr/eslint-config': 0.2.1_eslint@7.32.0+typescript@4.4.3
   '@rollup/plugin-babel': 5.3.0_rollup@2.57.0
   '@types/jest': 27.0.2
+  '@vue/composition-api': 1.2.2_vue@2.6.12
   '@vue/server-test-utils': 1.1.4_8b1619c95bb2c3e98943a5d10091a356
   '@vue/test-utils': 1.1.4_ae554d8947d7e926b014dda25865f517
   es-jest: 1.3.0
@@ -32,6 +37,7 @@ devDependencies:
   husky: 4.3.8
   jest: 26.6.3
   lint-staged: 10.5.4
+  outdent: 0.8.0
   rollup: 2.57.0
   rollup-plugin-filesize: 9.1.0
   rollup-plugin-terser: 7.0.2_rollup@2.57.0
@@ -895,6 +901,15 @@ packages:
       '@babel/helper-plugin-utils': 7.14.5
     dev: true
 
+  /@babel/plugin-syntax-typescript/7.14.5:
+    resolution: {integrity: sha512-u6OXzDaIXjEstBRRoBCQ/uKQKlbuaeE5in0RvWdA4pN6AhqxTIwUsnHPU1CFZA/amYObMsuWhYfRl3Ch90HD0Q==}
+    engines: {node: '>=6.9.0'}
+    peerDependencies:
+      '@babel/core': ^7.0.0-0
+    dependencies:
+      '@babel/helper-plugin-utils': 7.14.5
+    dev: true
+
   /@babel/plugin-transform-arrow-functions/7.14.5:
     resolution: {integrity: sha512-KOnO0l4+tD5IfOdi4x8C1XmEIRWUjNRV8wc6K2vz/3e8yAOoZZvsRXRRIF/yo/MAOFb4QjtAw9xSxMXbSMRy8A==}
     engines: {node: '>=6.9.0'}
@@ -1202,6 +1217,19 @@ packages:
       '@babel/helper-plugin-utils': 7.14.5
     dev: true
 
+  /@babel/plugin-transform-typescript/7.15.4:
+    resolution: {integrity: sha512-sM1/FEjwYjXvMwu1PJStH11kJ154zd/lpY56NQJ5qH2D0mabMv1CAy/kdvS9RP4Xgfj9fBBA3JiSLdDHgXdzOA==}
+    engines: {node: '>=6.9.0'}
+    peerDependencies:
+      '@babel/core': ^7.0.0-0
+    dependencies:
+      '@babel/helper-create-class-features-plugin': 7.15.4
+      '@babel/helper-plugin-utils': 7.14.5
+      '@babel/plugin-syntax-typescript': 7.14.5
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
+
   /@babel/plugin-transform-unicode-escapes/7.14.5:
     resolution: {integrity: sha512-crTo4jATEOjxj7bt9lbYXcBAM3LZaUrbP2uUdxb6WIorLmjNKSpHfIybgY4B8SRpbf8tEVIWH3Vtm7ayCrKocA==}
     engines: {node: '>=6.9.0'}
@@ -1314,6 +1342,19 @@ packages:
       '@babel/plugin-transform-dotall-regex': 7.14.5
       '@babel/types': 7.15.6
       esutils: 2.0.3
+    dev: true
+
+  /@babel/preset-typescript/7.15.0:
+    resolution: {integrity: sha512-lt0Y/8V3y06Wq/8H/u0WakrqciZ7Fz7mwPDHWUJAXlABL5hiUG42BNlRXiELNjeWjO5rWmnNKlx+yzJvxezHow==}
+    engines: {node: '>=6.9.0'}
+    peerDependencies:
+      '@babel/core': ^7.0.0-0
+    dependencies:
+      '@babel/helper-plugin-utils': 7.14.5
+      '@babel/helper-validator-option': 7.14.5
+      '@babel/plugin-transform-typescript': 7.15.4
+    transitivePeerDependencies:
+      - supports-color
     dev: true
 
   /@babel/runtime/7.12.13:
@@ -2013,6 +2054,15 @@ packages:
     dependencies:
       '@typescript-eslint/types': 4.32.0
       eslint-visitor-keys: 2.0.0
+    dev: true
+
+  /@vue/composition-api/1.2.2_vue@2.6.12:
+    resolution: {integrity: sha512-hnnock2l8Uawuzm/Nq8LqaztuOO70rpyX3Gz/Kpl/JtNalsG/EuuHuRQAWPiT3Is8NCB/8V5hiH7fmCmAc0+pQ==}
+    peerDependencies:
+      vue: '>= 2.5 < 3'
+    dependencies:
+      tslib: 2.3.1
+      vue: 2.6.12
     dev: true
 
   /@vue/server-test-utils/1.1.4_8b1619c95bb2c3e98943a5d10091a356:
@@ -6187,6 +6237,10 @@ packages:
       word-wrap: 1.2.3
     dev: true
 
+  /outdent/0.8.0:
+    resolution: {integrity: sha512-KiOAIsdpUTcAXuykya5fnVVT+/5uS0Q1mrkRHcF89tpieSmY33O/tmc54CqwA+bfhbtEfZUNLHaPUiB9X3jt1A==}
+    dev: true
+
   /p-each-series/2.2.0:
     resolution: {integrity: sha512-ycIL2+1V32th+8scbpTvyHNaHe02z0sjgh91XXjAk+ZeXoPN4Z46DVUnzdso0aX4KckKw0FNNFHdjZ2UsZvxiA==}
     engines: {node: '>=8'}
@@ -7660,6 +7714,10 @@ packages:
 
   /tslib/1.14.1:
     resolution: {integrity: sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==}
+    dev: true
+
+  /tslib/2.3.1:
+    resolution: {integrity: sha512-77EbyPPpMz+FRFRuAFlWMtmgUWGe9UOG2Z25NqCwiIjRhOf5iKGuzSe5P2w1laq+FkRy4p+PCuVkJSGkzTEKVw==}
     dev: true
 
   /tsutils/3.21.0_typescript@4.4.3:

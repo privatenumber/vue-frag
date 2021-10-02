@@ -6,6 +6,7 @@ const babelPlugin = babel({
 	extensions: ['.ts'],
 	babelHelpers: 'bundled',
 	presets: [
+		'@babel/preset-typescript',
 		['@babel/preset-env', {
 			loose: true,
 		}],
