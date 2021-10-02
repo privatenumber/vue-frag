@@ -1207,15 +1207,27 @@ test('nested fragments', async () => {
 
 	const wrapper = mount(usage);
 
-	expect(wrapper.html()).toBe('<app>\n  <div>1</div>\n</app>');
+	expect(wrapper.html()).toBe(outdent`
+	<app>
+	  <div>1</div>
+	</app>
+	`);
 
 	wrapper.setData({ id: 2 });
 	await wrapper.vm.$nextTick();
 
-	expect(wrapper.html()).toBe('<app>\n  <div>2</div>\n</app>');
+	expect(wrapper.html()).toBe(outdent`
+	<app>
+	  <div>2</div>
+	</app>
+	`);
 
 	wrapper.setData({ fragment: 'Fragment2' });
 	await wrapper.vm.$nextTick();
 
-	expect(wrapper.html()).toBe('<app>\n  <div>2</div>\n</app>');
+	expect(wrapper.html()).toBe(outdent`
+	<app>
+	  <div>2</div>
+	</app>
+	`);
 });

@@ -1,27 +1,20 @@
 import Vue from 'vue';
 import { mount } from '@vue/test-utils';
+import outdent from 'outdent';
 import frag from '../src/frag';
 import { serializeDOMTree, createMountTarget } from './utils';
 
 Vue.config.ignoredElements = [/./];
 
-test('Smallest tree', () => {
-	const normalApp = {
-		template: `
-		<parent>
-			<child />
-		</parent>
-		`,
+function createNonFrag(fragComponent) {
+	return {
+		...fragComponent,
+		template: fragComponent.template.replace(/v-frag/g, ''),
 	};
+}
 
-	const normalAppWrapper = mount(normalApp, {
-		attachTo: createMountTarget(),
-	});
 
-	const expectedHTML = serializeDOMTree(document.body);
-
-	normalAppWrapper.destroy();
-
+test('Smallest tree', () => {
 	const fragApp = {
 		template: `
 		<parent v-frag>
@@ -32,6 +25,14 @@ test('Smallest tree', () => {
 			frag,
 		},
 	};
+
+	const normalAppWrapper = mount(createNonFrag(fragApp), {
+		attachTo: createMountTarget(),
+	});
+
+	const expectedHTML = serializeDOMTree(document.body);
+
+	normalAppWrapper.destroy();
 
 	const fragAppWrapper = mount(fragApp, {
 		attachTo: createMountTarget(),
@@ -45,19 +46,6 @@ test('Smallest tree', () => {
 });
 
 test('With root app', () => {
-	const normalApp = {
-		template: `
-		<app>
-			<parent>
-				<child-a />
-				<child-b />
-			</parent>
-		</app>
-		`,
-	};
-
-	const normalAppWrapper = mount(normalApp);
-
 	const fragApp = {
 		template: `
 		<app>
@@ -72,32 +60,22 @@ test('With root app', () => {
 		},
 	};
 
+	const normalAppWrapper = mount(createNonFrag(fragApp));
 	const fragAppWrapper = mount(fragApp);
 
 	expect(serializeDOMTree(fragAppWrapper.element)).toBe(
 		serializeDOMTree(normalAppWrapper.element)
 	);
 
-	expect(fragAppWrapper.html()).toBe('<app>\n  <child-a></child-a>\n  <child-b></child-b>\n</app>');
+	expect(fragAppWrapper.html()).toBe(outdent`
+	<app>
+	  <child-a></child-a>
+	  <child-b></child-b>
+	</app>
+	`);
 });
 
 test('Deep nested tree', () => {
-	const normalApp = {
-		template: `
-		<app>
-			<parent-a>
-				<parent-b>
-					<parent-c>
-						<child-d />
-					</parent-c>
-				</parent-b>
-			</parent-a>
-		</app>
-		`,
-	};
-
-	const normalAppWrapper = mount(normalApp);
-
 	const fragApp = {
 		template: `
 		<app>
@@ -115,34 +93,21 @@ test('Deep nested tree', () => {
 		},
 	};
 
+	const normalAppWrapper = mount(createNonFrag(fragApp));
 	const fragAppWrapper = mount(fragApp);
 
 	expect(serializeDOMTree(fragAppWrapper.element)).toBe(
 		serializeDOMTree(normalAppWrapper.element)
 	);
 
-	expect(fragAppWrapper.html()).toBe('<app>\n  <child-d></child-d>\n</app>');
+	expect(fragAppWrapper.html()).toBe(outdent`
+	<app>
+	  <child-d></child-d>
+	</app>
+	`);
 });
 
 test('horizontal tree', () => {
-	const normalApp = {
-		template: `
-		<app>
-			<parent-a>
-				<child-a />
-			</parent-a>
-			<parent-b>
-				<child-b />
-			</parent-b>
-			<parent-c>
-				<child-c />
-			</parent-c>
-		</app>
-		`.replace(/[\t\n]/g, ''),
-	};
-
-	const normalAppWrapper = mount(normalApp);
-
 	const fragApp = {
 		template: `
 		<app>
@@ -162,11 +127,18 @@ test('horizontal tree', () => {
 		},
 	};
 
+	const normalAppWrapper = mount(createNonFrag(fragApp));
 	const fragAppWrapper = mount(fragApp);
 
 	expect(serializeDOMTree(fragAppWrapper.element)).toBe(
 		serializeDOMTree(normalAppWrapper.element)
 	);
 
-	expect(fragAppWrapper.html()).toBe('<app>\n  <child-a></child-a>\n  <child-b></child-b>\n  <child-c></child-c>\n</app>');
+	expect(fragAppWrapper.html()).toBe(outdent`
+	<app>
+	  <child-a></child-a>
+	  <child-b></child-b>
+	  <child-c></child-c>
+	</app>
+	`);
 });
