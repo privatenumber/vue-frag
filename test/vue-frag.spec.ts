@@ -1173,3 +1173,49 @@ test('updating sibling node - insertion', async () => {
 
 	expect(wrapper.html()).toBe('<app>Child\n  <!---->\n</app>');
 });
+
+// #48
+test('nested fragments', async () => {
+	const Fragment = {
+		directives: { frag },
+		template: '<frag v-frag><slot /></frag>',
+	};
+
+	const usage = {
+		template: `
+		<app>
+			<component :is="fragment">
+				<Fragment>
+					<div :key="id">{{ id }}</div>
+				</Fragment>
+			</component>
+		</app>
+		`,
+
+		components: {
+			Fragment,
+			Fragment2: Fragment,
+		},
+
+		data() {
+			return {
+				id: 1,
+				fragment: 'Fragment',
+			};
+		},
+	};
+
+	const wrapper = mount(usage);
+
+	expect(wrapper.html()).toBe('<app>\n  <div>1</div>\n</app>');
+
+	wrapper.setData({ id: 2 });
+	await wrapper.vm.$nextTick();
+
+	expect(wrapper.html()).toBe('<app>\n  <div>2</div>\n</app>');
+
+	wrapper.setData({ fragment: 'Fragment2' });
+	await wrapper.vm.$nextTick();
+
+	expect(wrapper.html()).toBe('<app>\n  <div>2</div>\n</app>');
+});
