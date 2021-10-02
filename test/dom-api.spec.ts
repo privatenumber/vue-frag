@@ -1,20 +1,62 @@
-import Vue from 'vue';
+import Vue, { ComponentOptions } from 'vue';
+import VueCommon from 'vue/dist/vue.common';
 import { mount } from '@vue/test-utils';
+import { defineComponent } from '@vue/composition-api';
 import outdent from 'outdent';
 import frag from '../src/frag';
 import { serializeDOMTree, createMountTarget } from './utils';
 
 Vue.config.ignoredElements = [/./];
 
-function createNonFrag(fragComponent) {
+type VueComponent = ComponentOptions<Vue>;
+function createNonFragApp<Component extends VueComponent>(fragComponent: Component) {
+	let components: VueComponent['components'] = undefined;
+
+	if (fragComponent.components) {
+		components = {
+			...fragComponent.components,
+		};
+
+		for (const componentName in components) {
+			components[componentName] = createNonFragApp(components[componentName] as Component);
+		}
+	}
+
 	return {
 		...fragComponent,
-		template: fragComponent.template.replace(/v-frag/g, ''),
+		template: fragComponent.template?.replace(/v-frag/g, ''),
+		components,
 	};
 }
 
 
-test('Smallest tree', () => {
+test('Basic usage', () => {
+	const FragComponent = {
+		template: `<frag v-frag>asdf</frag>`,
+		directives: {
+			frag,
+		},
+	};
+
+	const fragApp = {
+		template: '<app><frag-component /></app>',
+		components: {
+			FragComponent,
+		},
+	};
+
+	const normalAppWrapper = mount(createNonFragApp(fragApp));
+	const fragAppWrapper = mount(fragApp);
+
+	expect(serializeDOMTree(fragAppWrapper.element)).toBe(
+		serializeDOMTree(normalAppWrapper.element)
+	);	
+
+	expect(fragAppWrapper.html()).toBe(`<app>asdf</app>`);
+});
+
+
+test('Fragment on app root', () => {
 	const fragApp = {
 		template: `
 		<parent v-frag>
@@ -26,7 +68,7 @@ test('Smallest tree', () => {
 		},
 	};
 
-	const normalAppWrapper = mount(createNonFrag(fragApp), {
+	const normalAppWrapper = mount(createNonFragApp(fragApp), {
 		attachTo: createMountTarget(),
 	});
 
@@ -43,6 +85,8 @@ test('Smallest tree', () => {
 	expect(document.body.innerHTML).toBe('<child></child>');
 
 	fragAppWrapper.destroy();
+
+	expect(document.body.innerHTML).toBe('');
 });
 
 test('With root app', () => {
@@ -60,7 +104,7 @@ test('With root app', () => {
 		},
 	};
 
-	const normalAppWrapper = mount(createNonFrag(fragApp));
+	const normalAppWrapper = mount(createNonFragApp(fragApp));
 	const fragAppWrapper = mount(fragApp);
 
 	expect(serializeDOMTree(fragAppWrapper.element)).toBe(
@@ -93,7 +137,7 @@ test('Deep nested tree', () => {
 		},
 	};
 
-	const normalAppWrapper = mount(createNonFrag(fragApp));
+	const normalAppWrapper = mount(createNonFragApp(fragApp));
 	const fragAppWrapper = mount(fragApp);
 
 	expect(serializeDOMTree(fragAppWrapper.element)).toBe(
@@ -127,7 +171,7 @@ test('horizontal tree', () => {
 		},
 	};
 
-	const normalAppWrapper = mount(createNonFrag(fragApp));
+	const normalAppWrapper = mount(createNonFragApp(fragApp));
 	const fragAppWrapper = mount(fragApp);
 
 	expect(serializeDOMTree(fragAppWrapper.element)).toBe(
@@ -141,4 +185,54 @@ test('horizontal tree', () => {
 	  <child-c></child-c>
 	</app>
 	`);
+});
+
+test('Parent v-if', async () => {
+	const FragComponent = {
+		template: '<frag v-frag>Hello world</frag>',
+		directives: {
+			frag,
+		},
+	};
+
+	const fragApp = {
+		template: '<app><frag-component v-if="show" /></app>',
+		components: {
+			FragComponent,
+		},
+		data() {
+			return {
+				show: true,
+			};
+		},
+	};
+
+	const normalAppWrapper = mount(createNonFragApp(fragApp));
+	const fragAppWrapper = mount(fragApp);
+
+	expect(fragAppWrapper.html()).toBe('<app>Hello world</app>');
+
+	expect(serializeDOMTree(fragAppWrapper.element)).toBe(
+		serializeDOMTree(normalAppWrapper.element)
+	);
+
+	normalAppWrapper.setData({ show: false });
+	await fragAppWrapper.setData({ show: false });
+	expect(fragAppWrapper.html()).toBe(outdent`
+	<app>
+	  <!---->
+	</app>
+	`);
+
+	expect(serializeDOMTree(fragAppWrapper.element)).toBe(
+		serializeDOMTree(normalAppWrapper.element)
+	);
+
+	normalAppWrapper.setData({ show: true });
+	await fragAppWrapper.setData({ show: true });
+	expect(fragAppWrapper.html()).toBe('<app>Hello world</app>');
+
+	expect(serializeDOMTree(fragAppWrapper.element)).toBe(
+		serializeDOMTree(normalAppWrapper.element)
+	);
 });
