@@ -255,7 +255,7 @@ describe('Reactivity', () => {
 			},
 			props: ['num'],
 		};
-
+	
 		const usage = {
 			template: '<app><frag-component :num="num" /></app>',
 			components: {
@@ -267,19 +267,20 @@ describe('Reactivity', () => {
 				};
 			},
 		};
-
+	
 		const tpl = (content: string) => `<app>${content}</app>`;
-
+	
 		const wrapper = dualMount(usage);
-
+	
 		expect(wrapper.frag.html()).toBe(tpl('\n  <!---->\n'));
-
+		wrapper.expectMatchingDom();
+	
 		await wrapper.setData({ num: 1 });
 		expect(wrapper.frag.html()).toBe(tpl('1'));
-
+	
 		await wrapper.setData({ num: 2 });
 		expect(wrapper.frag.html()).toBe(tpl('12'));
-
+	
 		await wrapper.setData({ num: 3 });
 		expect(wrapper.frag.html()).toBe(tpl('123'));
 	});
@@ -319,15 +320,18 @@ describe('Reactivity', () => {
 		</app>
 		`;
 
-		const wrapper = mount(usage);
+		const wrapper = dualMount(usage);
 
-		expect(wrapper.html()).toBe(tpl([1]));
+		expect(wrapper.frag.html()).toBe(tpl([1]));
+		wrapper.expectMatchingDom();
 
 		await wrapper.setData({ num: 2 });
-		expect(wrapper.html()).toBe(tpl([1, 2]));
+		expect(wrapper.frag.html()).toBe(tpl([1, 2]));
+		wrapper.expectMatchingDom();
 
 		await wrapper.setData({ num: 3 });
-		expect(wrapper.html()).toBe(tpl([1, 2, 3]));
+		expect(wrapper.frag.html()).toBe(tpl([1, 2, 3]));
+		wrapper.expectMatchingDom();
 	});
 
 	test('slot w/ v-if', async () => {
@@ -370,17 +374,21 @@ describe('Reactivity', () => {
 		`;
 		const ifTrue = '<app class="wrapper">A B </app>';
 
-		const wrapper = mount(usage);
-		expect(wrapper.html()).toBe(empty);
+		const wrapper = dualMount(usage);
+		expect(wrapper.frag.html()).toBe(empty);
+		wrapper.expectMatchingDom();
 
 		await wrapper.setData({ show: true });
-		expect(wrapper.html()).toBe(ifTrue);
+		expect(wrapper.frag.html()).toBe(ifTrue);
+		wrapper.expectMatchingDom();
 
 		await wrapper.setData({ show: false });
-		expect(wrapper.html()).toBe(empty);
+		expect(wrapper.frag.html()).toBe(empty);
+		wrapper.expectMatchingDom();
 
 		await wrapper.setData({ show: true });
-		expect(wrapper.html()).toBe(ifTrue);
+		expect(wrapper.frag.html()).toBe(ifTrue);
+		wrapper.expectMatchingDom();
 	});
 
 	test('slot w/ v-for', async () => {
@@ -424,15 +432,18 @@ describe('Reactivity', () => {
 		</app>
 		`;
 
-		const wrapper = mount(usage);
+		const wrapper = dualMount(usage);
 
-		expect(wrapper.html()).toBe(tpl(['A 1', 'B 1', 'C 1']));
+		expect(wrapper.frag.html()).toBe(tpl(['A 1', 'B 1', 'C 1']));
+		wrapper.expectMatchingDom();
 
 		await wrapper.setData({ num: 2 });
-		expect(wrapper.html()).toBe(tpl(['A 1', 'A 2', 'B 1', 'B 2', 'C 1', 'C 2']));
+		expect(wrapper.frag.html()).toBe(tpl(['A 1', 'A 2', 'B 1', 'B 2', 'C 1', 'C 2']));
+		wrapper.expectMatchingDom();
 
 		await wrapper.setData({ num: 3 });
-		expect(wrapper.html()).toBe(tpl(['A 1', 'A 2', 'A 3', 'B 1', 'B 2', 'B 3', 'C 1', 'C 2', 'C 3']));
+		expect(wrapper.frag.html()).toBe(tpl(['A 1', 'A 2', 'A 3', 'B 1', 'B 2', 'B 3', 'C 1', 'C 2', 'C 3']));
+		wrapper.expectMatchingDom();
 	});
 });
 
@@ -762,17 +773,22 @@ test('v-if slot', async () => {
 	const empty = '<app class="wrapper">\n  <!---->\n</app>';
 	const ifTrue = '<app class="wrapper">\n  <div>A</div>\n</app>';
 
-	const wrapper = mount(usage);
-	expect(wrapper.html()).toBe(empty);
+	const wrapper = dualMount(usage);
+
+	expect(wrapper.frag.html()).toBe(empty);
+	wrapper.expectMatchingDom();
 
 	await wrapper.setData({ show: true });
-	expect(wrapper.html()).toBe(ifTrue);
+	expect(wrapper.frag.html()).toBe(ifTrue);
+	wrapper.expectMatchingDom();
 
 	await wrapper.setData({ show: false });
-	expect(wrapper.html()).toBe(empty);
+	expect(wrapper.frag.html()).toBe(empty);
+	wrapper.expectMatchingDom();
 
 	await wrapper.setData({ show: true });
-	expect(wrapper.html()).toBe(ifTrue);
+	expect(wrapper.frag.html()).toBe(ifTrue);
+	wrapper.expectMatchingDom();
 });
 
 // #27
@@ -882,17 +898,18 @@ test('updating sibling node - update', async () => {
 		},
 	};
 
-	const wrapper = mount(usage);
+	const wrapper = dualMount(usage);
 
-	expect(wrapper.html()).toBe('<app>Child<span></span></app>');
+	expect(wrapper.frag.html()).toBe('<app>Child<span></span></app>');
+	wrapper.expectMatchingDom();
 
 	await wrapper.setData({ isVisible: false });
-
-	expect(wrapper.html()).toBe('<app>\n  <!---->\n  <!---->\n</app>');
+	expect(wrapper.frag.html()).toBe('<app>\n  <!---->\n  <!---->\n</app>');
+	wrapper.expectMatchingDom();
 
 	await wrapper.setData({ isVisible: true });
-
-	expect(wrapper.html()).toBe('<app>Child<span></span></app>');
+	expect(wrapper.frag.html()).toBe('<app>Child<span></span></app>');
+	wrapper.expectMatchingDom();
 });
 
 
@@ -922,29 +939,30 @@ test('updating sibling node - removal', async () => {
 		},
 	};
 
-	const wrapper = mount(usage);
+	const wrapper = dualMount(usage);
 
-	expect(wrapper.html()).toBe('<app>\n  <!---->\n  <!---->\n</app>');
+	expect(wrapper.frag.html()).toBe('<app>\n  <!---->\n  <!---->\n</app>');
+	wrapper.expectMatchingDom();
 
 	await wrapper.setData({ isVisible: true });
-
-	expect(wrapper.html()).toBe('<app>ChildChild</app>');
+	expect(wrapper.frag.html()).toBe('<app>ChildChild</app>');
+	wrapper.expectMatchingDom();
 
 	await wrapper.setData({ isVisible: false });
-
-	expect(wrapper.html()).toBe('<app>\n  <!---->\n  <!---->\n</app>');
+	expect(wrapper.frag.html()).toBe('<app>\n  <!---->\n  <!---->\n</app>');
+	wrapper.expectMatchingDom();
 
 	await wrapper.setData({ isVisible: true });
-
-	expect(wrapper.html()).toBe('<app>ChildChild</app>');
+	expect(wrapper.frag.html()).toBe('<app>ChildChild</app>');
+	wrapper.expectMatchingDom();
 
 	await wrapper.setData({ isVisible: false });
-
-	expect(wrapper.html()).toBe('<app>\n  <!---->\n  <!---->\n</app>');
+	expect(wrapper.frag.html()).toBe('<app>\n  <!---->\n  <!---->\n</app>');
+	wrapper.expectMatchingDom();
 
 	await wrapper.setData({ isVisible: true });
-
-	expect(wrapper.html()).toBe('<app>ChildChild</app>');
+	expect(wrapper.frag.html()).toBe('<app>ChildChild</app>');
+	wrapper.expectMatchingDom();
 });
 
 // #16 3
@@ -973,17 +991,18 @@ test('updating sibling node - removal - no nextSibling', async () => {
 		},
 	};
 
-	const wrapper = mount(usage);
+	const wrapper = dualMount(usage);
 
-	expect(wrapper.html()).toBe('<app><span></span>Child<span></span></app>');
+	expect(wrapper.frag.html()).toBe('<app><span></span>Child<span></span></app>');
+	wrapper.expectMatchingDom();
 
 	await wrapper.setData({ isVisible: false });
-
-	expect(wrapper.html()).toBe('<app>\n  <!---->\n  <!---->\n  <!---->\n</app>');
+	expect(wrapper.frag.html()).toBe('<app>\n  <!---->\n  <!---->\n  <!---->\n</app>');
+	wrapper.expectMatchingDom();
 
 	await wrapper.setData({ isVisible: true });
-
-	expect(wrapper.html()).toBe('<app><span></span>Child<span></span></app>');
+	expect(wrapper.frag.html()).toBe('<app><span></span>Child<span></span></app>');
+	wrapper.expectMatchingDom();
 });
 
 // #16 4
@@ -1013,13 +1032,14 @@ test('updating sibling node - insertion - previous non-frag sibling', async () =
 		},
 	};
 
-	const wrapper = mount(usage);
+	const wrapper = dualMount(usage);
 
-	expect(wrapper.html()).toBe('<app>\n  <!---->Child</app>');
+	expect(wrapper.frag.html()).toBe('<app>\n  <!---->Child</app>');
+	wrapper.expectMatchingDom();
 
 	await wrapper.setData({ isVisibleA: true });
-
-	expect(wrapper.html()).toBe('<app>ChildChild</app>');
+	expect(wrapper.frag.html()).toBe('<app>ChildChild</app>');
+	wrapper.expectMatchingDom();
 });
 
 // #16 5
@@ -1049,15 +1069,18 @@ test('updating sibling node - insertion - placeholder before frag-child should b
 		},
 	};
 
-	const wrapper = mount(usage);
+	const wrapper = dualMount(usage);
 
-	expect(wrapper.html()).toBe('<app>ChildChild</app>');
+	expect(wrapper.frag.html()).toBe('<app>ChildChild</app>');
+	wrapper.expectMatchingDom();
 
 	await wrapper.setData({ isVisibleA: false });
-	expect(wrapper.html()).toBe('<app>\n  <!---->Child</app>');
+	expect(wrapper.frag.html()).toBe('<app>\n  <!---->Child</app>');
+	wrapper.expectMatchingDom();
 
 	await wrapper.setData({ isVisibleA: true });
-	expect(wrapper.html()).toBe('<app>ChildChild</app>');
+	expect(wrapper.frag.html()).toBe('<app>ChildChild</app>');
+	wrapper.expectMatchingDom();
 });
 
 // #16 6
@@ -1087,21 +1110,22 @@ test('updating sibling node - insertion', async () => {
 		},
 	};
 
-	const wrapper = mount(usage);
+	const wrapper = dualMount(usage);
 
-	expect(wrapper.html()).toBe('<app>ChildChild</app>');
+	expect(wrapper.frag.html()).toBe('<app>ChildChild</app>');
+	wrapper.expectMatchingDom();
 
 	await wrapper.setData({ isVisibleB: false });
-
-	expect(wrapper.html()).toBe('<app>Child\n  <!---->\n</app>');
+	expect(wrapper.frag.html()).toBe('<app>Child\n  <!---->\n</app>');
+	wrapper.expectMatchingDom();
 
 	await wrapper.setData({ isVisibleA: false });
-
-	expect(wrapper.html()).toBe('<app>\n  <!---->\n  <!---->\n</app>');
+	expect(wrapper.frag.html()).toBe('<app>\n  <!---->\n  <!---->\n</app>');
+	wrapper.expectMatchingDom();
 
 	await wrapper.setData({ isVisibleA: true });
-
-	expect(wrapper.html()).toBe('<app>Child\n  <!---->\n</app>');
+	expect(wrapper.frag.html()).toBe('<app>Child\n  <!---->\n</app>');
+	wrapper.expectMatchingDom();
 });
 
 // #48
@@ -1135,27 +1159,28 @@ test('nested fragments', async () => {
 		},
 	};
 
-	const wrapper = mount(usage);
+	const wrapper = dualMount(usage);
 
-	expect(wrapper.html()).toBe(outdent`
+	expect(wrapper.frag.html()).toBe(outdent`
 	<app>
 	  <div>1</div>
 	</app>
 	`);
+	wrapper.expectMatchingDom();
 
 	await wrapper.setData({ id: 2 });
-
-	expect(wrapper.html()).toBe(outdent`
+	expect(wrapper.frag.html()).toBe(outdent`
 	<app>
 	  <div>2</div>
 	</app>
 	`);
+	wrapper.expectMatchingDom();
 
 	await wrapper.setData({ fragment: 'Fragment2' });
-
-	expect(wrapper.html()).toBe(outdent`
+	expect(wrapper.frag.html()).toBe(outdent`
 	<app>
 	  <div>2</div>
 	</app>
 	`);
+	wrapper.expectMatchingDom();
 });

@@ -293,8 +293,8 @@ const frag = {
 		element.replaceWith(fragment);
 
 		children.forEach(node => {
-			// And sibling?
 			patchParentNode(node, element);
+			patchNextSibling(node);
 		});
 
 		// Vue doesn't use this, but for the sake of convenience in removing nodes

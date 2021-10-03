@@ -31,9 +31,14 @@ export function serializeNode(
 		return node;
 	}
 
+	// Ignore comment nodes, because v-frag uses a placeholder comment 
+	if (node.nodeName === '#comment') {
+		return null;
+	}
+
 	const serialized: SerializedNode = {
 		nodeName: node.nodeName,
-		hasChildNodes: node.hasChildNodes(),
+		// hasChildNodes: node.hasChildNodes(),
 	};
 
 	if (!noReference) {
@@ -47,7 +52,7 @@ export function serializeNode(
 
 export function serializeDOMTree(node: Node) {
 	return JSON.stringify(
-		bfs(node).map(node => serializeNode(node)),
+		bfs(node).map(node => serializeNode(node)).filter(Boolean),
 		null,
 		'\t',
 	);
@@ -95,6 +100,8 @@ export function dualMount<V extends Vue>(component: ComponentOptions<V>) {
 			]);
 		},
 		expectMatchingDom() {
+			// console.log('normal', serializeDOMTree(normal.element));
+			// console.log('frag', serializeDOMTree(frag.element));
 			expect(serializeDOMTree(frag.element)).toBe(
 				serializeDOMTree(normal.element)
 			);
