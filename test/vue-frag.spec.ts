@@ -1,13 +1,10 @@
 import Vue from 'vue';
 import { mount } from '@vue/test-utils';
 import frag from '../src/frag';
-import type { Component, ComponentOptions } from 'vue';
 import { defineComponent } from '@vue/composition-api';
 import outdent from 'outdent';
 import {
 	dualMount,
-	createNonFragApp,
-	serializeDOMTree,
 	createMountTarget,
 } from './utils';
 

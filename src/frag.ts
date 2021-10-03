@@ -1,44 +1,76 @@
-import { serializeNode } from '../test/utils';
-
 const $fakeParent = Symbol();
 const nextSiblingPatched = Symbol();
 const parentNodePatched = Symbol();
+const childNodesPatched = Symbol();
 const $placeholder = Symbol();
 
-function patchParentNode(
-	node: Node,
-	fakeParent: ParentNode,
-) {
-	// Is there ever a case where we need to unset fakeParent?
-	node[$fakeParent] = fakeParent;
-
-	if (node[parentNodePatched]) {
-		return;
-	}
-
-	node[parentNodePatched] = true;
-	Object.defineProperty(node, 'parentNode', {
-		get(this: Node) {
-			return this[$fakeParent] || this.parentElement;
-		},
-	});
+type FragmentElement<T extends Node = Node> = T & {
+	frag: ChildNode[];
+	[$placeholder]: Comment;
 }
 
-function patchNextSibling(
-	node: Node,
-) {
-	if (nextSiblingPatched in node) {
+type NodeWithFakeParent<T extends Node> = T & {
+	[$fakeParent]: Node;
+	[parentNodePatched]?: true;
+}
+
+type NodeWithFakeSibling<T extends Node> = T & {
+	[nextSiblingPatched]?: true;
+}
+
+type NodeWithFakeChildren<T extends Node> = T & {
+	[childNodesPatched]?: true;
+}
+
+function makeFragment<T extends Node>(
+	node: T,
+	fragment: Node[],
+): asserts node is FragmentElement<T> {
+	(node as FragmentElement<T>).frag = fragment as ChildNode[];
+}
+
+function patchParentNode<T extends Node>(
+	node: T,
+	fakeParent: Node,
+): asserts node is NodeWithFakeParent<T> {
+	const nodeWithFakeParent = node as NodeWithFakeParent<T>;
+
+	// Is there ever a case where we need to unset fakeParent?
+	nodeWithFakeParent[$fakeParent] = fakeParent;
+
+	if (parentNodePatched in nodeWithFakeParent) {
 		return;
 	}
 
-	node[nextSiblingPatched] = true;
+	nodeWithFakeParent[parentNodePatched] = true;
+	Object.defineProperty(
+		nodeWithFakeParent,
+		'parentNode',
+		{
+			get(this: NodeWithFakeParent<T>) {
+				return this[$fakeParent] || this.parentElement;
+			},
+		},
+	);
+}
+
+function patchNextSibling<T extends Node>(
+	node: T,
+): asserts node is NodeWithFakeSibling<T> {
+	const nodeWithFakeSibling = node as NodeWithFakeSibling<T>;
+
+	if (nextSiblingPatched in nodeWithFakeSibling) {
+		return;
+	}
+
+	nodeWithFakeSibling[nextSiblingPatched] = true;
 
 	Object.defineProperty(
-		node,
+		nodeWithFakeSibling,
 		'nextSibling',
 		{
-			get() {
-				const { childNodes } = this.parentNode;
+			get(this: NodeWithFakeSibling<T>) {
+				const { childNodes } = this.parentNode!;
 				const idx = childNodes.indexOf(this);
 				if (idx > -1) {
 					return childNodes[idx + 1] || null;
@@ -61,11 +93,18 @@ function getTopFragment(node: Node, fromParent: Node) {
 	return node;
 }
 
-const { get: getChildNodes } = Object.getOwnPropertyDescriptor(Node.prototype, 'childNodes')!;
+
+let getChildNodes: () => NodeListOf<ChildNode>;
 
 // For a parent to get fake children
 function getChildNodesWithFragments(node: Node) {
-	const realChildNodes: NodeListOf<ChildNode> = getChildNodes.apply(node);
+	// In case SSR
+	if (!getChildNodes) {
+		const childNodesDescriptor = Object.getOwnPropertyDescriptor(Node.prototype, 'childNodes');
+		getChildNodes = childNodesDescriptor!.get!;
+	}
+
+	const realChildNodes = getChildNodes.apply(node);
 
 	const childNodes = Array.from(realChildNodes).map(
 		childNode => getTopFragment(childNode, node) as ChildNode,
@@ -73,42 +112,45 @@ function getChildNodesWithFragments(node: Node) {
 
 	// De-dupe child nodes that point to the same fragment
 	return childNodes.filter(
-		(childNode, i, array) => childNode !== array[i - 1]
+		(childNode, index) => childNode !== childNodes[index - 1]
 	);
 }
 
-const childNodesPatched = Symbol();
-function patchChildNodes(
-	element: Node,
-	fakeChildNodes?: Node[],
-) {
-	if (fakeChildNodes) {
-		element.frag = fakeChildNodes;
-	}
-
-	if (childNodesPatched in element) {
+function patchChildNodes<T extends Node>(
+	node: T,
+): asserts node is NodeWithFakeChildren<T> {
+	const nodeWithFakeChildren = node as NodeWithFakeChildren<T>;
+	if (childNodesPatched in nodeWithFakeChildren) {
 		return;
 	}
 
-	element[childNodesPatched] = true;
+	nodeWithFakeChildren[childNodesPatched] = true;
 
-	Object.defineProperty(element, 'childNodes', {
-		get(this: Node) {
-			if (this.frag) {
-				return this.frag;
-			}
+	Object.defineProperty(
+		nodeWithFakeChildren,
+		'childNodes',
+		{
+			get(this: FragmentElement<T>) {
+				if (this.frag) {
+					return this.frag;
+				}
 
-			return getChildNodesWithFragments(this);
+				return getChildNodesWithFragments(this);
+			},
 		},
-	});
+	);
 
-	Object.defineProperty(element, 'firstChild', {
-		get(this: Node) {
-			return this.childNodes[0] || null;
+	Object.defineProperty(
+		node,
+		'firstChild',
+		{
+			get(this: T) {
+				return this.childNodes[0] || null;
+			},
 		},
-	});
+	);
 
-	element.hasChildNodes = function () {
+	node.hasChildNodes = function () {
 		return this.childNodes.length > 0;
 	};
 }
@@ -118,34 +160,28 @@ function patchChildNodes(
  */
 
 // This works recursively. If child is also a frag, it automatically goes another level down
-const before: ChildNode['before'] = function (newNode) {
-	this.frag[0].before(newNode);
+const before: ChildNode['before'] = function (
+	this: FragmentElement,
+	...nodes
+) {
+	this.frag[0].before(...nodes);
 };
 
-const remove: ChildNode['remove'] = function (this: ChildNode) {
+const remove: ChildNode['remove'] = function (this: FragmentElement) {
 	// If the fragment is being removed, all children, including placeholder should be removed
 	const { frag } = this;
 	const removed = frag.splice(0, frag.length);
 	removed.forEach(node => node.remove());			
 };
 
-
-type FragmentElement = Element & {
-	frag: ChildNode[];
-	[$placeholder]: Comment;
-	[$fakeParent]: ParentNode;
-}
-
 function getFragmentLeafNodes(children: ChildNode[]) {
 	return children.flatMap(childNode => childNode.frag ? getFragmentLeafNodes(childNode.frag) : childNode);
 }
 
-
-// function patchFragmentMethods(element: Element): asserts element is FragmentElement {
-
-// }
-
-function addPlaceholder(node: Node, insertBeforeNode: ChildNode) {
+function addPlaceholder(
+	node: FragmentElement,
+	insertBeforeNode: ChildNode,
+) {
 	const placeholder = node[$placeholder];
 
 	insertBeforeNode.before(placeholder);
@@ -153,7 +189,10 @@ function addPlaceholder(node: Node, insertBeforeNode: ChildNode) {
 	node.frag.unshift(placeholder);
 }
 
-const removeChild: Node['removeChild'] = function (node) {
+const removeChild: Node['removeChild'] = function (
+	this: FragmentElement,
+	node,
+) {
 	if (this.frag) {
 		// If this is a fragment element
 
@@ -183,7 +222,11 @@ const removeChild: Node['removeChild'] = function (node) {
 	return node;
 }
 
-const insertBefore: Node['insertBefore'] = function (insertNode, insertBeforeNode) {
+const insertBefore: Node['insertBefore'] = function (
+	this: FragmentElement,
+	insertNode,
+	insertBeforeNode,
+) {
 	// Should this be leaf nodes?
 	const insertNodes = insertNode.frag || [insertNode];
 
@@ -226,7 +269,10 @@ const insertBefore: Node['insertBefore'] = function (insertNode, insertBeforeNod
 	return insertNode;
 };
 
-const appendChild: Node['appendChild'] = function (node) {
+const appendChild: Node['appendChild'] = function (
+	this: FragmentElement,
+	node,
+) {
 	const { length } = this.frag;
 	const lastChild = this.frag[length - 1];
 	
@@ -240,7 +286,7 @@ const appendChild: Node['appendChild'] = function (node) {
 	return node;
 }
 
-function removePlaceholder(node: Node) {
+function removePlaceholder(node: FragmentElement) {
 	const placeholder = node[$placeholder];
 	if (node.frag[0] === placeholder) {
 		node.frag.shift();
@@ -249,10 +295,7 @@ function removePlaceholder(node: Node) {
 }
 
 const frag = {
-	inserted(el: Element) {
-		const element = el as FragmentElement;
-		// At inserted, we want to remove the element,
-		// and insert its children in place of it
+	inserted(element: Element) {
 		const {
 			parentNode,
 			nextSibling,
@@ -265,27 +308,13 @@ const frag = {
 		// If there are no children, insert a comment placeholder to mark the location
 		const placeholder = document.createComment('');
 
-		element[$placeholder] = placeholder;
 		if (children.length === 0) {
 			children.push(placeholder);
 		}
 
-		if (parentNode) {
-			patchParentNode(element, parentNode);
-			patchChildNodes(parentNode);
-			parentNode.removeChild = removeChild;
-			parentNode.insertBefore = insertBefore;
-		}
+		makeFragment(element, children);
 
-		if (nextSibling) {
-			patchNextSibling(element);
-		}
-
-		if (previousSibling) {
-			patchNextSibling(previousSibling);
-		}
-
-		patchChildNodes(element, children);
+		element[$placeholder] = placeholder;
 
 		// Swap element with children (or placeholder)
 		const fragment = document.createDocumentFragment();
@@ -297,13 +326,15 @@ const frag = {
 			patchNextSibling(node);
 		});
 
-		// Vue doesn't use this, but for the sake of convenience in removing nodes
-		// test: removing all nodes, and re-inserting them
-		element.remove = remove;
-		element.appendChild = appendChild;
-		element.insertBefore = insertBefore;
-		element.removeChild = removeChild;
-		element.before = before;
+		patchChildNodes(element);
+
+		Object.assign(element, {
+			remove,
+			appendChild,
+			insertBefore,
+			removeChild,
+			before,
+		});
 
 		Object.defineProperty(element, 'innerHTML', {
 			set(this: FragmentElement, htmlString: string) {
@@ -320,6 +351,21 @@ const frag = {
 				return '';
 			},
 		});
+
+		if (parentNode) {
+			parentNode.removeChild = removeChild;
+			parentNode.insertBefore = insertBefore;
+			patchParentNode(element, parentNode);
+			patchChildNodes(parentNode);
+		}
+
+		if (nextSibling) {
+			patchNextSibling(element);
+		}
+
+		if (previousSibling) {
+			patchNextSibling(previousSibling);
+		}
 	},
 
 	unbind(element: Element) {

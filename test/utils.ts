@@ -20,7 +20,8 @@ type SerializedNode = {
 	parentNode?: SerializedNode | null;
 	nextSibling?: SerializedNode | null;
 	firstChild?: SerializedNode | null;
-	hasChildNodes: boolean;
+	// disabled because it evals to true when comment placeholder exists
+	// hasChildNodes: boolean;
 };
 
 export function serializeNode(
@@ -38,7 +39,6 @@ export function serializeNode(
 
 	const serialized: SerializedNode = {
 		nodeName: node.nodeName,
-		// hasChildNodes: node.hasChildNodes(),
 	};
 
 	if (!noReference) {
@@ -100,8 +100,6 @@ export function dualMount<V extends Vue>(component: ComponentOptions<V>) {
 			]);
 		},
 		expectMatchingDom() {
-			// console.log('normal', serializeDOMTree(normal.element));
-			// console.log('frag', serializeDOMTree(frag.element));
 			expect(serializeDOMTree(frag.element)).toBe(
 				serializeDOMTree(normal.element)
 			);
