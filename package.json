@@ -22,6 +22,7 @@
 	"main": "dist/frag.cjs.js",
 	"module": "dist/frag.esm.js",
 	"unpkg": "dist/frag.js",
+	"types": "./frag.d.ts",
 	"scripts": {
 		"build": "rollup -c --environment NODE_ENV:production",
 		"test": "jest",

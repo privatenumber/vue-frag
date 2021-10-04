@@ -4,74 +4,45 @@ const parentNodePatched = Symbol();
 const childNodesPatched = Symbol();
 const $placeholder = Symbol();
 
-type FragmentElement<T extends Node = Node> = T & {
-	frag: Node[];
-	[$placeholder]: Comment;
-}
+const isFrag = node => 'frag' in node;
 
-type NodeWithFakeParent<T extends Node> = T & {
-	[$fakeParent]: Node;
-	[parentNodePatched]?: true;
-}
-
-type NodeWithFakeSibling<T extends Node> = T & {
-	[nextSiblingPatched]?: true;
-}
-
-type NodeWithFakeChildren<T extends Node> = T & {
-	[childNodesPatched]?: true;
-}
-
-function makeFragment<T extends Node>(
-	node: T,
-	fragment: Node[],
-): asserts node is FragmentElement<T> {
-	(node as FragmentElement<T>).frag = fragment;
-}
-
-function patchParentNode<T extends Node>(
-	node: T,
-	fakeParent: Node,
-): asserts node is NodeWithFakeParent<T> {
-	const nodeWithFakeParent = node as NodeWithFakeParent<T>;
-
+function patchParentNode(
+	node,
+	fakeParent,
+) {
 	// Is there ever a case where we need to unset fakeParent?
-	nodeWithFakeParent[$fakeParent] = fakeParent;
+	node[$fakeParent] = fakeParent;
 
-	if (parentNodePatched in nodeWithFakeParent) {
+	if (parentNodePatched in node) {
 		return;
 	}
 
-	nodeWithFakeParent[parentNodePatched] = true;
+	node[parentNodePatched] = true;
 	Object.defineProperty(
-		nodeWithFakeParent,
+		node,
 		'parentNode',
 		{
-			get(this: NodeWithFakeParent<T>) {
+			get() {
 				return this[$fakeParent] || this.parentElement;
 			},
 		},
 	);
 }
 
-function patchNextSibling<T extends Node>(
-	node: T,
-): asserts node is NodeWithFakeSibling<T> {
-	const nodeWithFakeSibling = node as NodeWithFakeSibling<T>;
-
-	if (nextSiblingPatched in nodeWithFakeSibling) {
+function patchNextSibling(node) {
+	if (nextSiblingPatched in node) {
 		return;
 	}
 
-	nodeWithFakeSibling[nextSiblingPatched] = true;
+	node[nextSiblingPatched] = true;
 
 	Object.defineProperty(
-		nodeWithFakeSibling,
+		node,
 		'nextSibling',
 		{
-			get(this: ChildNode) {
-				const { childNodes } = this.parentNode!;
-				const index = Array.from(childNodes).indexOf(this);
+			get() {
+				const { childNodes } = this.parentNode;
+				const index = childNodes.indexOf(this);
 				if (index > -1) {
 					return childNodes[index + 1] || null;
 				}
@@ -82,7 +53,7 @@ function patchNextSibling<T extends Node>(
 	);
 }
 
-function getTopFragment(node: Node, fromParent: Node) {
+function getTopFragment(node, fromParent) {
 	while (node.parentNode !== fromParent) {
 		const { parentNode } = node;
 		if (parentNode) {
@@ -93,20 +64,19 @@ function getTopFragment(node: Node, fromParent: Node) {
 	return node;
 }
 
-let getChildNodes: () => NodeListOf<ChildNode>;
+let getChildNodes;
 
 // For a parent to get fake children
-function getChildNodesWithFragments(node: Node) {
+function getChildNodesWithFragments(node) {
 	// In case SSR
 	if (!getChildNodes) {
 		const childNodesDescriptor = Object.getOwnPropertyDescriptor(Node.prototype, 'childNodes');
-		getChildNodes = childNodesDescriptor!.get!;
+		getChildNodes = childNodesDescriptor.get;
 	}
 
 	const realChildNodes = getChildNodes.apply(node);
-
 	const childNodes = Array.from(realChildNodes).map(
-		childNode => getTopFragment(childNode, node) as ChildNode,
+		childNode => getTopFragment(childNode, node),
 	);
 
 	// De-dupe child nodes that point to the same fragment
@@ -115,26 +85,19 @@ function getChildNodesWithFragments(node: Node) {
 	);
 }
 
-function patchChildNodes<T extends Node>(
-	node: T,
-): asserts node is NodeWithFakeChildren<T> {
-	const nodeWithFakeChildren = node as NodeWithFakeChildren<T>;
-	if (childNodesPatched in nodeWithFakeChildren) {
+function patchChildNodes(node) {
+	if (childNodesPatched in node) {
 		return;
 	}
 
-	nodeWithFakeChildren[childNodesPatched] = true;
+	node[childNodesPatched] = true;
 
 	Object.defineProperty(
-		nodeWithFakeChildren,
+		node,
 		'childNodes',
 		{
-			get(this: Node) {
-				if (isFrag(this)) {
-					return this.frag;
-				}
-
-				return getChildNodesWithFragments(this);
+			get() {
+				return this.frag || getChildNodesWithFragments(this);
 			},
 		},
 	);
@@ -143,7 +106,7 @@ function patchChildNodes<T extends Node>(
 		node,
 		'firstChild',
 		{
-			get(this: T) {
+			get() {
 				return this.childNodes[0] || null;
 			},
 		},
@@ -159,46 +122,40 @@ function patchChildNodes<T extends Node>(
  */
 
 // This works recursively. If child is also a frag, it automatically goes another level down
-const before: ChildNode['before'] = function (
-	this: FragmentElement,
-	...nodes
-) {
-	(this.frag[0] as ChildNode).before(...nodes);
-};
+function before(...nodes) {
+	this.frag[0].before(...nodes);
+}
 
-const remove: ChildNode['remove'] = function (this: FragmentElement) {
+function remove() {
 	// If the fragment is being removed, all children, including placeholder should be removed
 	const { frag } = this;
 	const removed = frag.splice(0, frag.length);
-	removed.forEach(node => (node as ChildNode).remove());
-};
+	removed.forEach((node) => {
+		node.remove();
+	});
+}
 
-const isFrag = <T extends Node>(node: T): node is FragmentElement<T> => 'frag' in node;
-
-function getFragmentLeafNodes<T extends Node>(children: T[]): T[] {
+function getFragmentLeafNodes(children) {
 	// flat map
 	return Array.prototype.concat(...children.map(childNode => (
 		isFrag(childNode)
-			? getFragmentLeafNodes(childNode.frag as T[])
+			? getFragmentLeafNodes(childNode.frag)
 			: childNode
 	)));
 }
 
 function addPlaceholder(
-	node: FragmentElement,
-	insertBeforeNode: Node,
+	node,
+	insertBeforeNode,
 ) {
 	const placeholder = node[$placeholder];
 
-	(insertBeforeNode as ChildNode).before(placeholder);
+	insertBeforeNode.before(placeholder);
 	patchParentNode(placeholder, node);
 	node.frag.unshift(placeholder);
 }
 
-const removeChild = function <T extends ChildNode> (
-	this: Node,
-	node: T,
-) {
+function removeChild(node) {
 	if (isFrag(this)) {
 		// If this is a fragment element
 		const hasChildInFragment = this.frag.indexOf(node);
@@ -215,7 +172,7 @@ const removeChild = function <T extends ChildNode> (
 	} else {
 		// For frag parent
 		const children = getChildNodesWithFragments(this);
-		const childNode = node as unknown as ChildNode;
+		const childNode = node;
 		const hasChild = children.indexOf(childNode);
 
 		if (hasChild > -1) {
@@ -224,15 +181,14 @@ const removeChild = function <T extends ChildNode> (
 	}
 
 	return node;
-};
+}
 
-const insertBefore: Node['insertBefore'] = function (
-	this: ParentNode,
+function insertBefore(
 	insertNode,
-	insertBeforeNode: ChildNode,
+	insertBeforeNode,
 ) {
 	// Should this be leaf nodes?
-	const insertNodes = isFrag(insertNode) ? insertNode.frag : [insertNode];
+	const insertNodes = insertNode.frag || [insertNode];
 
 	// If this element is a fragment, insert nodes in virtual fragment
 	if (isFrag(this)) {
@@ -242,12 +198,12 @@ const insertBefore: Node['insertBefore'] = function (
 			const index = frag.indexOf(insertBeforeNode);
 			if (index > -1) {
 				frag.splice(index, 0, ...insertNodes);
-				(insertBeforeNode as ChildNode).before(...insertNodes);
+				insertBeforeNode.before(...insertNodes);
 			}
 		} else {
 			const lastNode = frag[frag.length - 1];
 			frag.push(...insertNodes);
-			(lastNode as ChildNode).after(...insertNodes);
+			lastNode.after(...insertNodes);
 		}
 
 		removePlaceholder(this);
@@ -255,7 +211,7 @@ const insertBefore: Node['insertBefore'] = function (
 		const { childNodes } = this;
 
 		if (insertBeforeNode) {
-			if (Array.from(childNodes).includes(insertBeforeNode)) {
+			if (childNodes.includes(insertBeforeNode)) {
 				insertBeforeNode.before(...insertNodes);
 			}
 		} else {
@@ -263,34 +219,31 @@ const insertBefore: Node['insertBefore'] = function (
 		}
 	}
 
-	insertNodes.forEach((insertNode) => {
-		patchParentNode(insertNode, this);
+	insertNodes.forEach((node) => {
+		patchParentNode(node, this);
 	});
 
 	const lastNode = insertNodes[insertNodes.length - 1];
 	patchNextSibling(lastNode);
 
 	return insertNode;
-};
+}
 
-const appendChild: Node['appendChild'] = function (
-	this: FragmentElement,
-	node,
-) {
-	const { length } = this.frag;
-	const lastChild = this.frag[length - 1] as ChildNode;
+function appendChild(node) {
+	const { frag } = this;
+	const lastChild = frag[frag.length - 1];
 
 	lastChild.after(node);
 	patchParentNode(node, this);
 
 	removePlaceholder(this);
 
-	this.frag.push(node);
+	frag.push(node);
 
 	return node;
-};
+}
 
-function removePlaceholder(node: FragmentElement) {
+function removePlaceholder(node) {
 	const placeholder = node[$placeholder];
 	if (node.frag[0] === placeholder) {
 		node.frag.shift();
@@ -299,7 +252,7 @@ function removePlaceholder(node: FragmentElement) {
 }
 
 const frag = {
-	inserted(element: Element) {
+	inserted(element) {
 		const {
 			parentNode,
 			nextSibling,
@@ -316,8 +269,7 @@ const frag = {
 			children.push(placeholder);
 		}
 
-		makeFragment(element, children);
-
+		element.frag = children;
 		element[$placeholder] = placeholder;
 
 		// Swap element with children (or placeholder)
@@ -341,14 +293,17 @@ const frag = {
 		});
 
 		Object.defineProperty(element, 'innerHTML', {
-			set(this: FragmentElement, htmlString: string) {
+			set(htmlString) {
 				const domify = document.createElement('div');
 				domify.innerHTML = htmlString;
 
 				const oldNodesIndex = this.frag.length;
 
-				// eslint-disable-next-line unicorn/prefer-dom-node-append
-				Array.from(domify.childNodes).forEach(node => this.appendChild(node));
+				// Array.from makes a copy of the NodeList, which is live updating as we appendChild
+				Array.from(domify.childNodes).forEach((node) => {
+					// eslint-disable-next-line unicorn/prefer-dom-node-append
+					this.appendChild(node);
+				});
 				domify.append(...this.frag.splice(0, oldNodesIndex));
 			},
 			get() {
@@ -374,7 +329,7 @@ const frag = {
 		}
 	},
 
-	unbind(element: Element) {
+	unbind(element) {
 		element.remove();
 		// Not necessary to clean up .frag, etc because Node is scrapped
 	},

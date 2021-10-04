@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import { mount } from '@vue/test-utils';
 import outdent from 'outdent';
-import frag from '../src/frag';
+import frag from '..';
 import {
 	dualMount,
 	createNonFragApp,
