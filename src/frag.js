@@ -1,8 +1,7 @@
+const $placeholder = Symbol();
 const $fakeParent = Symbol();
 const nextSiblingPatched = Symbol();
-const parentNodePatched = Symbol();
 const childNodesPatched = Symbol();
-const $placeholder = Symbol();
 
 const isFrag = node => 'frag' in node;
 
@@ -10,14 +9,12 @@ function patchParentNode(
 	node,
 	fakeParent,
 ) {
-	// Is there ever a case where we need to unset fakeParent?
-	node[$fakeParent] = fakeParent;
-
-	if (parentNodePatched in node) {
+	if ($fakeParent in node) {
 		return;
 	}
 
-	node[parentNodePatched] = true;
+	node[$fakeParent] = fakeParent;
+
 	Object.defineProperty(
 		node,
 		'parentNode',
@@ -92,25 +89,18 @@ function patchChildNodes(node) {
 
 	node[childNodesPatched] = true;
 
-	Object.defineProperty(
-		node,
-		'childNodes',
-		{
+	Object.defineProperties(node, {
+		childNodes: {
 			get() {
 				return this.frag || getChildNodesWithFragments(this);
 			},
 		},
-	);
-
-	Object.defineProperty(
-		node,
-		'firstChild',
-		{
+		firstChild: {
 			get() {
 				return this.childNodes[0] || null;
 			},
 		},
-	);
+	});
 
 	node.hasChildNodes = function () {
 		return this.childNodes.length > 0;
@@ -135,14 +125,14 @@ function remove() {
 	});
 }
 
-function getFragmentLeafNodes(children) {
-	// flat map
-	return Array.prototype.concat(...children.map(childNode => (
+// FlatMap polyfill
+const getFragmentLeafNodes = children => Array.prototype.concat(
+	...children.map(childNode => (
 		isFrag(childNode)
 			? getFragmentLeafNodes(childNode.frag)
 			: childNode
-	)));
-}
+	)),
+);
 
 function addPlaceholder(
 	node,
@@ -172,11 +162,10 @@ function removeChild(node) {
 	} else {
 		// For frag parent
 		const children = getChildNodesWithFragments(this);
-		const childNode = node;
-		const hasChild = children.indexOf(childNode);
+		const hasChild = children.indexOf(node);
 
 		if (hasChild > -1) {
-			childNode.remove();
+			node.remove();
 		}
 	}
 
@@ -207,16 +196,12 @@ function insertBefore(
 		}
 
 		removePlaceholder(this);
-	} else {
-		const { childNodes } = this;
-
-		if (insertBeforeNode) {
-			if (childNodes.includes(insertBeforeNode)) {
-				insertBeforeNode.before(...insertNodes);
-			}
-		} else {
-			this.append(...insertNodes);
+	} else if (insertBeforeNode) {
+		if (this.childNodes.includes(insertBeforeNode)) {
+			insertBeforeNode.before(...insertNodes);
 		}
+	} else {
+		this.append(...insertNodes);
 	}
 
 	insertNodes.forEach((node) => {
@@ -257,27 +242,26 @@ const frag = {
 			parentNode,
 			nextSibling,
 			previousSibling,
-			childNodes,
 		} = element;
 
-		const children = Array.from(childNodes);
+		const childNodes = Array.from(element.childNodes);
 
 		// If there are no children, insert a comment placeholder to mark the location
 		const placeholder = document.createComment('');
 
-		if (children.length === 0) {
-			children.push(placeholder);
+		if (childNodes.length === 0) {
+			childNodes.push(placeholder);
 		}
 
-		element.frag = children;
+		element.frag = childNodes;
 		element[$placeholder] = placeholder;
 
 		// Swap element with children (or placeholder)
 		const fragment = document.createDocumentFragment();
-		fragment.append(...getFragmentLeafNodes(children));
+		fragment.append(...getFragmentLeafNodes(childNodes));
 		element.replaceWith(fragment);
 
-		children.forEach((node) => {
+		childNodes.forEach((node) => {
 			patchParentNode(node, element);
 			patchNextSibling(node);
 		});
