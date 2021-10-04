@@ -155,7 +155,7 @@ vue-frag works by tricking Vue.js to think that the root element is still in the
 
 When vue-frag is applied to an element, it uses the [`inserted` directive hook](https://vuejs.org/v2/guide/custom-directive.html#Hook-Functions) to swap the element out with its children to remove itself from the DOM. It then patches surrounding DOM nodes (eg. parent, sibling, children) to make them think that the element is still in the DOM.
 
-Here are all the DOM APIs Vue.js uses that need to be patched:
+Here are all the DOM APIs Vue.js uses that are patched:
 
 - [`insertBefore()`](https://github.com/vuejs/vue/blob/531b7619b137aecd71441e1ea53dae3066d71bc8/dist/vue.js#L5748)
 
@@ -177,7 +177,7 @@ Here are all the DOM APIs Vue.js uses that need to be patched:
 
 
 ### Does `v-show` work?
-[Like in Vue 3](https://jsfiddle.net/hirokiosame/pebL1cdx/), `v-show` will not work on components that return fragments. `v-show` works by setting `style="display: none"` on the root element of the target component. With vue-frag removing the root element, there would be no grouping-element to apply the `display: none` to. If the fragment returned elements, it's possible to apply it to each child-node, but it's possible for them to be text-nodes which cannot be styled.
+[Like in Vue 3](https://jsfiddle.net/hirokiosame/pebL1cdx/), `v-show` does not work on components that return a fragment. `v-show` works by setting `style="display: none"` on the root element of the target component. With vue-frag removing the root element, there would be no grouping-element to apply the `display: none` to. If the fragment returned elements, it's possible to apply it to each child-node, but it's possible for them to be text-nodes which cannot be styled.
 
 
 ## 👨‍👩‍👧 Related
