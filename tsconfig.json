@@ -6,7 +6,6 @@
 		"target": "ES5",
 	},
 	"include": [
-		"src",
 		"test",
 		"rollup.config.ts"
 	]
