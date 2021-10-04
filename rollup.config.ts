@@ -3,7 +3,6 @@ import { terser } from 'rollup-plugin-terser';
 import filesize from 'rollup-plugin-filesize';
 
 const babelPlugin = babel({
-	extensions: ['.ts'],
 	babelHelpers: 'bundled',
 	presets: [
 		['@babel/preset-env', {
@@ -13,7 +12,7 @@ const babelPlugin = babel({
 });
 
 const rollupConfig = {
-	input: 'src/frag.ts',
+	input: 'src/frag.js',
 	plugins: [
 		babelPlugin,
 
@@ -48,7 +47,7 @@ const rollupConfig = {
 };
 
 const rollupConfigMin = {
-	input: 'src/frag.ts',
+	input: 'src/frag.js',
 	plugins: [
 		babelPlugin,
 

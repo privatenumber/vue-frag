@@ -3,7 +3,7 @@
  */
 
 import { render } from '@vue/server-test-utils';
-import frag from '../src/frag';
+import frag from '..';
 
 test('SSR', async () => {
 	const wrapper = await render({

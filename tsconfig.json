@@ -1,5 +1,10 @@
 {
-	"compilerOptions": {},
+	"compilerOptions": {
+		"strict": true,
+		"esModuleInterop": true,
+		"lib": ["DOM"],
+		"target": "ES5",
+	},
 	"include": [
 		"src",
 		"test",
