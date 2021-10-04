@@ -13,7 +13,7 @@ Vue.config.ignoredElements = [/./];
 
 test('Basic usage', () => {
 	const FragComponent = {
-		template: `<frag v-frag>hello</frag>`,
+		template: '<frag v-frag>hello</frag>',
 		directives: {
 			frag,
 		},
@@ -31,7 +31,6 @@ test('Basic usage', () => {
 	wrapper.expectMatchingDom();
 	expect(wrapper.frag.html()).toBe('<app>hello</app>');
 });
-
 
 test('Fragment on app root', () => {
 	const fragApp = {

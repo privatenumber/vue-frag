@@ -1,8 +1,8 @@
 import Vue from 'vue';
 import { mount } from '@vue/test-utils';
-import frag from '../src/frag';
 import { defineComponent } from '@vue/composition-api';
 import outdent from 'outdent';
+import frag from '../src/frag';
 import {
 	dualMount,
 	createMountTarget,
@@ -252,7 +252,7 @@ describe('Reactivity', () => {
 			},
 			props: ['num'],
 		};
-	
+
 		const usage = {
 			template: '<app><frag-component :num="num" /></app>',
 			components: {
@@ -264,20 +264,20 @@ describe('Reactivity', () => {
 				};
 			},
 		};
-	
+
 		const tpl = (content: string) => `<app>${content}</app>`;
-	
+
 		const wrapper = dualMount(usage);
-	
+
 		expect(wrapper.frag.html()).toBe(tpl('\n  <!---->\n'));
 		wrapper.expectMatchingDom();
-	
+
 		await wrapper.setData({ num: 1 });
 		expect(wrapper.frag.html()).toBe(tpl('1'));
-	
+
 		await wrapper.setData({ num: 2 });
 		expect(wrapper.frag.html()).toBe(tpl('12'));
-	
+
 		await wrapper.setData({ num: 3 });
 		expect(wrapper.frag.html()).toBe(tpl('123'));
 	});
@@ -672,7 +672,7 @@ test('Parent nested v-if', async () => {
 	};
 
 	const $parent = mount(ParentComp, {
-		attachTo: createMountTarget()
+		attachTo: createMountTarget(),
 	});
 
 	expect(document.body.innerHTML).toBe('Parent <div>Child</div>');
@@ -908,7 +908,6 @@ test('updating sibling node - update', async () => {
 	expect(wrapper.frag.html()).toBe('<app>Child<span></span></app>');
 	wrapper.expectMatchingDom();
 });
-
 
 // #16 2
 test('updating sibling node - removal', async () => {
