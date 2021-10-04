@@ -1,5 +1,3 @@
 module.exports = {
-	transform: {
-		'\\.js$': 'es-jest',
-	},
+	preset: 'es-jest',
 };

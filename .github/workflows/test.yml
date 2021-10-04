@@ -10,22 +10,15 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [10.x, 14.x]
-
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
+    - name: Use Node.js 12.x
       uses: actions/setup-node@v1
       with:
-        node-version: ${{ matrix.node-version }}
+        node-version: 12.x
     - name: Install dependencies
       run: npx ci
-    - name: Build
-      run: npm run build
     - name: Lint
       run: npm run lint
     - name: Test
