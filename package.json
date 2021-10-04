@@ -25,6 +25,7 @@
 	"types": "./frag.d.ts",
 	"scripts": {
 		"build": "rollup -c --environment NODE_ENV:production",
+		"pretest": "npm run build",
 		"test": "jest",
 		"lint": "eslint ."
 	},
