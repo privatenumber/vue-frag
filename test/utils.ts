@@ -5,7 +5,7 @@ function bfs(rootNode: Node) {
 	const queue = [rootNode];
 	const allNodes: Node[] = [];
 
-	while (queue.length) {
+	while (queue.length > 0) {
 		const node = queue.shift()!;
 		allNodes.push(node);
 
@@ -32,7 +32,7 @@ export function serializeNode(
 		return node;
 	}
 
-	// Ignore comment nodes, because v-frag uses a placeholder comment 
+	// Ignore comment nodes, because v-frag uses a placeholder comment
 	if (node.nodeName === '#comment') {
 		return null;
 	}
@@ -50,9 +50,9 @@ export function serializeNode(
 	return serialized;
 }
 
-export function serializeDOMTree(node: Node) {
+export function serializeDOMTree(rootNode: Node) {
 	return JSON.stringify(
-		bfs(node).map(node => serializeNode(node)).filter(Boolean),
+		bfs(rootNode).map(node => serializeNode(node)).filter(Boolean),
 		null,
 		'\t',
 	);
@@ -67,13 +67,14 @@ export function createMountTarget() {
 
 export function createNonFragApp<V extends Vue>(fragComponent: ComponentOptions<V>) {
 	type Component = ComponentOptions<V>;
-	let components: Component['components'] = undefined;
+	let components: Component['components'];
 
 	if (fragComponent.components) {
 		components = {
 			...fragComponent.components,
 		};
 
+		// eslint-disable-next-line guard-for-in
 		for (const componentName in components) {
 			components[componentName] = createNonFragApp(components[componentName] as Component);
 		}
@@ -93,15 +94,18 @@ export function dualMount<V extends Vue>(component: ComponentOptions<V>) {
 	return {
 		frag,
 		normal,
+
+		// eslint-disable-next-line @typescript-eslint/ban-types
 		setData(data: object) {
 			return Promise.all([
 				normal.setData(data),
 				frag.setData(data),
 			]);
 		},
+
 		expectMatchingDom() {
 			expect(serializeDOMTree(frag.element)).toBe(
-				serializeDOMTree(normal.element)
+				serializeDOMTree(normal.element),
 			);
 		},
 	};
