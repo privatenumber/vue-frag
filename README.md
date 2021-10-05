@@ -4,16 +4,26 @@ Use [Vue 3's Fragment feature](https://v3.vuejs.org/guide/migration/fragments.ht
 
 ```vue
 <template>
-    <div v-frag> ⬅ This root element is unwrapped and removed on render!
+    <fragment> ⬅ This root element will not exist in the DOM
 
         <li>Element 1</li>
         <li>Element 2</li>
         <li>Element 3</li>
-    </div>
+    </fragment>
 </template>
+
+<script>
+import { Fragment } from 'vue-frag'
+
+export default {
+    components: {
+        Fragment
+    }
+}
+</script>
 ```
 
-👉 Try out a [demo in this CodePen](https://codepen.io/hirokiosame/pen/PoNVZbV)!
+👉 [Try it out on CodePen](https://codepen.io/hirokiosame/pen/PoNVZbV)!
 
 <sub>Support this project by ⭐️ starring and sharing it. [Follow me](https://github.com/privatenumber) to see what other cool projects I'm working on! ❤️</sub>
 
@@ -29,67 +39,87 @@ npm i vue-frag
 ```
 
 ## 🚦 Quick Setup
+You can either choose to use the _Component_ or _Directive_ API.
 
-#### Register globally
-Make it available anywhere in your Vue application.
+### Component API
+The Component API is designed to be used at the root of the template. It should feel intuitive to use and cover most use-cases.
 
-```js
-import frag from 'vue-frag';
-Vue.directive('frag', frag);
-```
-
-#### Register locally
-Explicitly register it to a component you want to use it in.
-
+Import `Fragment` and use it as the root element of your component:
 ```vue
-...
+<template>
+    <fragment>
+        Hello world!
+    </fragment>
+</template>
 
 <script>
-import frag from 'vue-frag';
+import { Fragment } from 'vue-frag'
 
 export default {
-    directives: {
-        frag
-    },
-
-    ...
-};
+    components: {
+        Fragment
+    }
+}
 </script>
 ```
 
-#### Prefer a component API?
-Create a `Fragment.vue` component:
+#### Register globally
+[Globally registering](https://vuejs.org/v2/guide/components-registration.html) the component lets you use it without needing to import it every time.
+```js
+import { Fragment } from 'vue-frag'
+
+Vue.component('Fragment', Fragment)
+```
+
+### Directive API
+Use the Directive API to have more nuanced control over placement. For example, if you want to unwrap the root node of a component on the usage-end.
+
+The Component API uses the Directive API under the hood.
 
 ```vue
 <template>
     <div v-frag>
-        <slot />
+        Hello world!
     </div>
 </template>
 
 <script>
-import frag from 'vue-frag';
+import frag from 'vue-frag'
 
 export default {
     directives: {
         frag
     }
-};
+}
 </script>
 ```
 
-And use it as a component:
-```vue
-<template>
-    <fragment>
-        No root element!
-    </fragment>
-</template>
+#### Register globally
+Make it available anywhere in your Vue application.
+
+```js
+import frag from 'vue-frag'
+
+Vue.directive('frag', frag)
 ```
 
 ## 👨🏻‍🏫 Examples
 
 #### Returning multiple root nodes <a href="https://codepen.io/hirokiosame/pen/PoNVZbV"><img src="https://img.shields.io/badge/codepen.io-demo-blue" valign="bottom"></a>
+Component API
+```vue
+<template>
+    <fragment> <!-- This element will be unwrapped -->
+
+        <div v-for="i in 10">
+            {{ i }}
+        </div>
+    </fragment>
+</template>
+```
+
+
+Directive API
 ```vue
 <template>
     <div v-frag> <!-- This element will be unwrapped -->
@@ -102,6 +132,8 @@ And use it as a component:
 ```
 
 #### Unwrapping the root node from a component
+Use the Directive API to unwrap the root node of a component.
+
 ```vue
 <template>
     <div>
@@ -115,7 +147,9 @@ And use it as a component:
 ```vue
 <template>
     <div v-frag>
-        <template v-if />
+        <template v-if="isShown">
+            Hello world!
+        </template>
     </div>
 </template>
 ```
