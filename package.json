@@ -37,7 +37,8 @@
 	},
 	"lint-staged": {
 		"*.{js,ts}": [
-			"eslint --fix",
+			"eslint",
+			"npm run build",
 			"jest --bail --findRelatedTests"
 		]
 	},
