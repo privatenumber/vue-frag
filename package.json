@@ -41,6 +41,9 @@
 			"jest --bail --findRelatedTests"
 		]
 	},
+	"peerDependencies": {
+		"vue": "^2.6.0"
+	},
 	"devDependencies": {
 		"@babel/preset-env": "^7.15.6",
 		"@pvtnbr/eslint-config": "^0.2.1",
