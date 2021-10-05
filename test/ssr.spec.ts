@@ -1,7 +1,3 @@
-/**
- * @jest-environment node
- */
-
 import { render } from '@vue/server-test-utils';
 import frag from '..';
 
