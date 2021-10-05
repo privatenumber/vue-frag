@@ -4,16 +4,26 @@ Use [Vue 3's Fragment feature](https://v3.vuejs.org/guide/migration/fragments.ht
 
 ```vue
 <template>
-    <div v-frag> ⬅ This root element is unwrapped and removed on render!
+    <fragment> ⬅ This root element will not exist in the DOM
 
         <li>Element 1</li>
         <li>Element 2</li>
         <li>Element 3</li>
-    </div>
+    </fragment>
 </template>
+
+<script>
+import { Fragment } from 'vue-frag'
+
+export default {
+    components: {
+        Fragment
+    }
+}
+</script>
 ```
 
-👉 Try out a [demo in this CodePen](https://codepen.io/hirokiosame/pen/PoNVZbV)!
+👉 [Try it out on CodePen](https://codepen.io/hirokiosame/pen/PoNVZbV)!
 
 <sub>Support this project by ⭐️ starring and sharing it. [Follow me](https://github.com/privatenumber) to see what other cool projects I'm working on! ❤️</sub>
 
@@ -29,67 +39,87 @@ npm i vue-frag
 ```
 
 ## 🚦 Quick Setup
+You can either choose to use the _Component_ or _Directive_ API.
 
-#### Register globally
-Make it available anywhere in your Vue application.
+### Component API
+The Component API is designed to be used at the root of the template. It should feel intuitive to use and cover most use-cases.
 
-```js
-import frag from 'vue-frag';
-Vue.directive('frag', frag);
-```
-
-#### Register locally
-Explicitly register it to a component you want to use it in.
-
+Import `Fragment` and use it as the root element of your component:
 ```vue
-...
+<template>
+    <fragment>
+        Hello world!
+    </fragment>
+</template>
 
 <script>
-import frag from 'vue-frag';
+import { Fragment } from 'vue-frag'
 
 export default {
-    directives: {
-        frag
-    },
-
-    ...
-};
+    components: {
+        Fragment
+    }
+}
 </script>
 ```
 
-#### Prefer a component API?
-Create a `Fragment.vue` component:
+#### Register globally
+[Globally registering](https://vuejs.org/v2/guide/components-registration.html) the component lets you use it without needing to import it every time.
+```js
+import { Fragment } from 'vue-frag'
+
+Vue.component('Fragment', Fragment)
+```
+
+### Directive API
+Use the Directive API to have more nuanced control over placement. For example, if you want to unwrap the root node of a component on the usage-end.
+
+The Component API uses the Directive API under the hood.
 
 ```vue
 <template>
     <div v-frag>
-        <slot />
+        Hello world!
     </div>
 </template>
 
 <script>
-import frag from 'vue-frag';
+import frag from 'vue-frag'
 
 export default {
     directives: {
         frag
     }
-};
+}
 </script>
 ```
 
-And use it as a component:
-```vue
-<template>
-    <fragment>
-        No root element!
-    </fragment>
-</template>
+#### Register globally
+Make it available anywhere in your Vue application.
+
+```js
+import frag from 'vue-frag'
+
+Vue.directive('frag', frag)
 ```
 
 ## 👨🏻‍🏫 Examples
 
 #### Returning multiple root nodes <a href="https://codepen.io/hirokiosame/pen/PoNVZbV"><img src="https://img.shields.io/badge/codepen.io-demo-blue" valign="bottom"></a>
+Component API
+```vue
+<template>
+    <fragment> <!-- This element will be unwrapped -->
+
+        <div v-for="i in 10">
+            {{ i }}
+        </div>
+    </fragment>
+</template>
+```
+
+
+Directive API
 ```vue
 <template>
     <div v-frag> <!-- This element will be unwrapped -->
@@ -102,6 +132,8 @@ And use it as a component:
 ```
 
 #### Unwrapping the root node from a component
+Use the Directive API to unwrap the root node of a component.
+
 ```vue
 <template>
     <div>
@@ -115,7 +147,9 @@ And use it as a component:
 ```vue
 <template>
     <div v-frag>
-        <template v-if />
+        <template v-if="isShown">
+            Hello world!
+        </template>
     </div>
 </template>
 ```
@@ -150,15 +184,34 @@ Related VueJS Issues / Stackoverflow Qs:
 - [vuejs/vue #7606](https://github.com/vuejs/vue/issues/7606)
 - [Stackoverflow: A way to render multiple root elements in VueJS?](https://stackoverflow.com/questions/47511674/a-way-to-render-multiple-root-elements-on-vuejs-with-v-for-directive)
 
-### How is this different from [vue-fragment](https://www.npmjs.com/package/vue-fragment)?
-They are both designed to do the same thing. However, [vue-fragment](https://github.com/Thunberg087/vue-fragment) is a component and vue-frag is a directive. I made vue-frag when I saw vue-fragment didn't have any tests to ensure correct behavior, had a lot of unattended issues, and didn't seem actively maintained. In terms of size, they are both small but vue-frag is slightly smaller (`993B` vs `798B`).
-
-
 ### How does this work?
-Vue associates vNodes with specific DOM references so once a component has mounted, the DOM nodes can be moved around and Vue will still be able to mutate them by reference. The Frag directive simply replaces the root element of a component in the DOM with it's children upon DOM insertion, and monkey-patches native properties like `parentNode` on the children to make Vue think they're still using the component root element.
+vue-frag works by tricking Vue.js to think that the root element is still in the DOM, when it's actually not.
+
+When vue-frag is applied to an element, it uses the [`inserted` directive hook](https://vuejs.org/v2/guide/custom-directive.html#Hook-Functions) to swap the element out with its children to remove itself from the DOM. It then patches surrounding DOM nodes (eg. parent, sibling, children) to make them think that the element is still in the DOM.
+
+Here are all the DOM APIs Vue.js uses that are patched:
+
+- [`insertBefore()`](https://github.com/vuejs/vue/blob/531b7619b137aecd71441e1ea53dae3066d71bc8/dist/vue.js#L5748)
+
+- [`removeChild()`](https://github.com/vuejs/vue/blob/531b7619b137aecd71441e1ea53dae3066d71bc8/dist/vue.js#L5752)
+
+- [`appendChild()`](https://github.com/vuejs/vue/blob/531b7619b137aecd71441e1ea53dae3066d71bc8/dist/vue.js#L5756)
+
+- [`hasChildNodes()`](https://github.com/vuejs/vue/blob/531b7619b137aecd71441e1ea53dae3066d71bc8/dist/vue.js#L6427)
+
+- [`parentNode`](https://github.com/vuejs/vue/blob/531b7619b137aecd71441e1ea53dae3066d71bc8/dist/vue.js#L5760)
+
+- [`nextSibling`](https://github.com/vuejs/vue/blob/531b7619b137aecd71441e1ea53dae3066d71bc8/dist/vue.js#L5764)
+
+- [`firstChild`](https://github.com/vuejs/vue/blob/531b7619b137aecd71441e1ea53dae3066d71bc8/dist/vue.js#L6447)
+
+- [`childNodes`](https://github.com/vuejs/vue/blob/531b7619b137aecd71441e1ea53dae3066d71bc8/dist/vue.js#L7667)
+
+- [`innerHTML`](https://github.com/vuejs/vue/blob/531b7619b137aecd71441e1ea53dae3066d71bc8/dist/vue.js#L6431)
+
 
 ### Does `v-show` work?
-Unfortunately not. `v-show` works by setting `style="display: none"` on the root element of the target component, and with `vue-frag` unwrapping and removing the root element, there would be no grouping-element to apply the `display: none` to. If the fragment returned elements, it's possible to apply it to each child-node, but it's possible for them to be text-nodes which cannot be styled.
+[Like in Vue 3](https://jsfiddle.net/hirokiosame/pebL1cdx/), `v-show` does not work on components that return a fragment. `v-show` works by setting `style="display: none"` on the root element of the target component. With vue-frag removing the root element, there would be no grouping-element to apply the `display: none` to. If the fragment returned elements, it's possible to apply it to each child-node, but it's possible for them to be text-nodes which cannot be styled.
 
 
 ## 👨‍👩‍👧 Related
