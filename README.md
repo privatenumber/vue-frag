@@ -25,9 +25,14 @@ export default {
 
 👉 [Try it out on CodePen](https://codepen.io/hirokiosame/pen/PoNVZbV)!
 
-> **Pro-tip**
->
-> Use [vue-frag-plugin](https://github.com/privatenumber/vue-frag-plugin) to automatically inject vue-frag so that you can return multiple root nodes without a fragment component!
+<table>
+   <td>
+       <strong>🔥 Pro-tip</strong>
+       <br><br>
+       Want to be able to just have multiple root-nodes in your SFC without a wrapper?
+       Use <a href="https://github.com/privatenumber/vue-frag-plugin">vue-frag-plugin</a> to automatically inject vue-frag so that you can return multiple root nodes without a fragment component!
+   </td>
+</table>
 
 <sub>Support this project by ⭐️ starring and sharing it. [Follow me](https://github.com/privatenumber) to see what other cool projects I'm working on! ❤️</sub>
 
