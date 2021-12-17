@@ -1,6 +1,6 @@
 # vue-frag <a href="https://npm.im/vue-frag"><img src="https://badgen.net/npm/v/vue-frag"></a> <a href="https://npm.im/vue-frag"><img src="https://badgen.net/npm/dm/vue-frag"></a> <a href="https://bundlephobia.com/result?p=vue-frag"><img src="https://badgen.net/bundlephobia/minzip/vue-frag"></a>
 
-Use [Vue 3's Fragment feature](https://v3.vuejs.org/guide/migration/fragments.html) in Vue 2 to return multiple root elements
+Use [Vue 3's Fragment feature](https://v3.vuejs.org/guide/migration/fragments.html) in Vue 2 to return multiple root elements.
 
 ```vue
 <template>
@@ -24,6 +24,15 @@ export default {
 ```
 
 👉 [Try it out on CodePen](https://codepen.io/hirokiosame/pen/PoNVZbV)!
+
+<table>
+   <td>
+       <strong>🔥 Pro-tip</strong>
+       <br><br>
+       Want to be able to just have multiple root-nodes in your SFC without a wrapper?
+       Use <a href="https://github.com/privatenumber/vue-frag-plugin">vue-frag-plugin</a> to automatically inject vue-frag so that you can return multiple root nodes without a fragment component!
+   </td>
+</table>
 
 <sub>Support this project by ⭐️ starring and sharing it. [Follow me](https://github.com/privatenumber) to see what other cool projects I'm working on! ❤️</sub>
 
@@ -215,6 +224,7 @@ Here are all the DOM APIs Vue.js uses that are patched:
 
 
 ## 👨‍👩‍👧 Related
+- [vue-frag-plugin](https://github.com/privatenumber/vue-frag-plugin) - Build-time plugin to seamlessly use multiple root nodes
 - [vue-subslot](https://github.com/privatenumber/vue-subslot) - 💍 pick out specific elements from component `<slot>`s
 - [vue-vnode-syringe](https://github.com/privatenumber/vue-vnode-syringe) - 🧬 Add attributes and event-listeners to `<slot>` content 💉
 - [vue-proxi](https://github.com/privatenumber/vue-proxi) - 💠 Tiny proxy component
