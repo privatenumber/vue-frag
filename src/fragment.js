@@ -1,6 +1,7 @@
 import frag from './frag.js';
 
 export default {
+	name: 'Fragment',
 	directives: {
 		frag,
 	},
