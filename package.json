@@ -4,8 +4,10 @@
 	"description": "Vue 2 fragment directive to return multiple root elements",
 	"keywords": [
 		"vue",
+		"vuejs",
 		"fragment",
 		"directive",
+		"component",
 		"ssr",
 		"multiple root nodes"
 	],
