@@ -1,6 +1,6 @@
-import { ComponentOptions } from 'vue';
+import Vue, { ComponentOptions } from 'vue';
 
-type FragmentComponent = ComponentOptions<never, never, never, never, never, never>;
+type FragmentComponent<V extends Vue = Vue> = ComponentOptions<V, never, never, never, never, never>;
 
 declare const frag: {
 	inserted(element: Element): void;
