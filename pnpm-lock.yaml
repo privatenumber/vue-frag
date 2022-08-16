@@ -8,7 +8,7 @@ specifiers:
   '@vue/composition-api': ^1.2.3
   '@vue/server-test-utils': ^1.2.1
   '@vue/test-utils': ^1.2.2
-  clean-pkg-json: ^1.0.0
+  clean-pkg-json: ^1.0.1
   es-jest: ^1.3.0
   eslint: ^7.19.0
   jest: ^27.2.4
@@ -31,7 +31,7 @@ devDependencies:
   '@vue/composition-api': 1.2.3_vue@2.6.14
   '@vue/server-test-utils': 1.2.1_3btsfcowjndftzq5uddguq6rtu
   '@vue/test-utils': 1.2.2_sbs6or2oam5i4s4vmfp4rzwdnq
-  clean-pkg-json: 1.0.0
+  clean-pkg-json: 1.0.1
   es-jest: 1.3.0
   eslint: 7.32.0
   jest: 27.2.4
@@ -2452,8 +2452,8 @@ packages:
     resolution: {integrity: sha512-cOU9usZw8/dXIXKtwa8pM0OTJQuJkxMN6w30csNRUerHfeQ5R6U3kkU/FtJeIf3M202OHfY2U8ccInBG7/xogA==}
     dev: true
 
-  /clean-pkg-json/1.0.0:
-    resolution: {integrity: sha512-J29Lf+6KaLFF28S7REbPgJmrAh89TTAELrtR1zB9PNjW+POHU5QzvZLDEp7m4WBY2Km7rdmD7Hf3dmptAxExBg==}
+  /clean-pkg-json/1.0.1:
+    resolution: {integrity: sha512-nYn3fhWHmODwJ7J5hVlSkEuKxRbr9HbvZxR6OznQqor8+PBlzGeh7D5KONzM04MzO3iT6jKz5ta6HCNFU6YPTw==}
     hasBin: true
     dev: true
 
