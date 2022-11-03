@@ -280,8 +280,8 @@ const frag = {
 			set(htmlString) {
 				const domify = document.createElement('div');
 				domify.innerHTML = htmlString;
-
-				const oldNodesIndex = this.frag.length;
+        const hasPlaceholder = this.frag[0] === placeholder;
+				const oldNodesIndex = hasPlaceholder ? 0 : this.frag.length;
 
 				// Array.from makes a copy of the NodeList, which is live updating as we appendChild
 				Array.from(domify.childNodes).forEach((node) => {
