@@ -288,7 +288,12 @@ const frag = {
 					// eslint-disable-next-line unicorn/prefer-dom-node-append
 					this.appendChild(node);
 				});
-				domify.append(...this.frag.splice(0, oldNodesIndex));
+
+        const removedNodes = this.frag.splice(0, oldNodesIndex);
+        if (this.frag.length === 0 && removedNodes[0]) {
+          addPlaceholder(this, removedNodes[0]);
+        }
+				domify.append(...removedNodes);
 			},
 			get() {
 				return '';
