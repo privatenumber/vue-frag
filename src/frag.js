@@ -280,7 +280,7 @@ const frag = {
 			set(htmlString) {
 				const domify = document.createElement('div');
 				domify.innerHTML = htmlString;
-        			const hasPlaceholder = this.frag[0] === placeholder;
+				const hasPlaceholder = this.frag[0] === placeholder;
 				const oldNodesIndex = hasPlaceholder ? 0 : this.frag.length;
 
 				// Array.from makes a copy of the NodeList, which is live updating as we appendChild
@@ -291,7 +291,7 @@ const frag = {
 
 				const removedNodes = this.frag.splice(0, oldNodesIndex);
 				if (this.frag.length === 0 && removedNodes[0]) {
-				  addPlaceholder(this, removedNodes[0]);
+					addPlaceholder(this, removedNodes[0]);
 				}
 				domify.append(...removedNodes);
 			},
