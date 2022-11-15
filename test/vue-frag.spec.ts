@@ -7,7 +7,10 @@ import { mount } from '@vue/test-utils';
 import { defineComponent } from '@vue/composition-api';
 import outdent from 'outdent';
 import frag from '..';
-import { dualMount, createMountTarget } from './utils';
+import {
+	dualMount,
+	createMountTarget,
+} from './utils';
 
 Vue.config.ignoredElements = ['app', 'frag'];
 
@@ -24,7 +27,7 @@ test('Nested frags', async () => {
 			frag,
 		},
 		beforeCreate() {
-      this.$options.components!.ChildComp = ChildComp;
+			this.$options.components!.ChildComp = ChildComp;
 		},
 	});
 
@@ -440,9 +443,7 @@ describe('Reactivity', () => {
 		wrapper.expectMatchingDom();
 
 		await wrapper.setData({ num: 3 });
-		expect(wrapper.frag.html()).toBe(
-			tpl(['A 1', 'A 2', 'A 3', 'B 1', 'B 2', 'B 3', 'C 1', 'C 2', 'C 3']),
-		);
+		expect(wrapper.frag.html()).toBe(tpl(['A 1', 'A 2', 'A 3', 'B 1', 'B 2', 'B 3', 'C 1', 'C 2', 'C 3']));
 		wrapper.expectMatchingDom();
 	});
 });
@@ -553,8 +554,7 @@ test('Parent nested v-if empty', async () => {
 	};
 
 	const ParentComp = {
-		template:
-      '<frag v-frag>Parent <child-comp v-if="shown" ref="child" /><div v-else>No Child</div></frag>',
+		template: '<frag v-frag>Parent <child-comp v-if="shown" ref="child" /><div v-else>No Child</div></frag>',
 
 		directives: {
 			frag,
@@ -730,11 +730,9 @@ test('child order change', async () => {
 
 	const tpl = (content: number) => `<app>${content}</app>`;
 
-	const wrapper = mount<
-    Vue & {
-      numbers: number[];
-    }
-  >(usage);
+	const wrapper = mount<Vue & {
+		numbers: number[];
+	}>(usage);
 
 	expect(wrapper.html()).toBe(tpl(123));
 
@@ -980,8 +978,7 @@ test('updating sibling node - removal - no nextSibling', async () => {
 	const usage = {
 		// Important that this is in one-line
 		// When breaking into multiple lines, it inserts a textNode in between and breaks reproduction
-		template:
-      '<app><span v-if="isVisible" /><child :show="isVisible" /><span v-if="isVisible" /></app>',
+		template: '<app><span v-if="isVisible" /><child :show="isVisible" /><span v-if="isVisible" /></app>',
 
 		components: {
 			Child,
@@ -1186,41 +1183,4 @@ test('nested fragments', async () => {
 	</app>
 	`);
 	wrapper.expectMatchingDom();
-});
-
-// #67
-test('Set innerHTML of empty fragment', async () => {
-	const usage = {
-		template: `
-        <div>
-          <div v-frag ref="fragment" />
-        </div>
-        `,
-		directives: { frag },
-		data() {
-			return {
-				html: '',
-			};
-		},
-		watch: {
-			html() {
-				this.$refs.fragment.innerHTML = this.html;
-			},
-		},
-	};
-
-	const wrapper = mount(usage);
-
-	await wrapper.setData({ html: '<span>first</span><span>second</span>' });
-	expect(wrapper.html()).toBe('<div><span>first</span><span>second</span></div>');
-
-	await wrapper.setData({ html: '' });
-	expect(wrapper.html()).toBe(outdent`
-  <div>
-    <!---->
-  </div>`);
-
-	// Set innerHTML to empty string, then set innerHTML
-	await wrapper.setData({ html: '<span>first</span><span>second</span>' });
-	expect(wrapper.html()).toBe('<div><span>first</span><span>second</span></div>');
 });
