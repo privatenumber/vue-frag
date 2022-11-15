@@ -1187,6 +1187,8 @@ test('nested fragments', async () => {
 
 // #67
 test('Set innerHTML of empty fragment', async () => {
+	// The code below is not a common use-case.
+	// It is written only for testing. Avoid direct DOM manipulation whenever possible.
 	const forTest = {
 		template: `
         <div>
