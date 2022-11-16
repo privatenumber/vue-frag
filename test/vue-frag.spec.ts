@@ -1184,3 +1184,50 @@ test('nested fragments', async () => {
 	`);
 	wrapper.expectMatchingDom();
 });
+
+// #67
+test('Set innerHTML of empty fragment', async () => {
+	// The code below is not a common use-case.
+	// It is written only for testing. Avoid direct DOM manipulation whenever possible.
+	const usage = defineComponent({
+		template: '<app><frag v-frag ref="fragment" /></app>',
+		directives: { frag },
+		data() {
+			return {
+				html: '',
+			};
+		},
+		watch: {
+			html() {
+				(this.$refs.fragment as HTMLElement).innerHTML = this.html;
+			},
+		},
+	});
+
+	const wrapper = mount(usage);
+	expect(wrapper.html()).toBe(
+		outdent`
+		<app>
+		  <!---->
+		</app>
+		`,
+	);
+
+	const html = '<span>first</span><span>second</span>';
+	const output = '<app><span>first</span><span>second</span></app>';
+
+	await wrapper.setData({ html });
+	expect(wrapper.html()).toBe(output);
+
+	await wrapper.setData({ html: '' });
+	expect(wrapper.html()).toBe(
+		outdent`
+		<app>
+		  <!---->
+		</app>
+		`,
+	);
+
+	await wrapper.setData({ html });
+	expect(wrapper.html()).toBe(output);
+});
