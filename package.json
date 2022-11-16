@@ -30,7 +30,7 @@
 		"prepare": "simple-git-hooks",
 		"build": "rollup -c --environment NODE_ENV:production",
 		"pretest": "npm run build",
-		"test": "jest",
+		"test": "pnpm build && jest",
 		"lint": "eslint .",
 		"prepack": "clean-pkg-json -k unpkg"
 	},
