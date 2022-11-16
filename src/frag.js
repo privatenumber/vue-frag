@@ -278,22 +278,24 @@ const frag = {
 
 		Object.defineProperty(element, 'innerHTML', {
 			set(htmlString) {
-				const domify = document.createElement('div');
-				domify.innerHTML = htmlString;
-				const hasPlaceholder = this.frag[0] === placeholder;
-				const oldNodesIndex = hasPlaceholder ? 0 : this.frag.length;
-
-				// Array.from makes a copy of the NodeList, which is live updating as we appendChild
-				Array.from(domify.childNodes).forEach((node) => {
-					// eslint-disable-next-line unicorn/prefer-dom-node-append
-					this.appendChild(node);
-				});
-
-				const removedNodes = this.frag.splice(0, oldNodesIndex);
-				if (this.frag.length === 0 && removedNodes[0]) {
-					addPlaceholder(this, removedNodes[0]);
+				// If it has childrem (non-placeholder), remove them
+				if (this.frag[0] !== placeholder) {
+					this.frag.slice().forEach(
+						// eslint-disable-next-line unicorn/prefer-dom-node-remove
+						child => this.removeChild(child),
+					);
 				}
-				domify.append(...removedNodes);
+
+				if (htmlString) {
+					const domify = document.createElement('div');
+					domify.innerHTML = htmlString;
+
+					// Array.from makes a copy of the NodeList, which is live updating as we appendChild
+					Array.from(domify.childNodes).forEach((node) => {
+						// eslint-disable-next-line unicorn/prefer-dom-node-append
+						this.appendChild(node);
+					});
+				}
 			},
 			get() {
 				return '';

@@ -1189,12 +1189,8 @@ test('nested fragments', async () => {
 test('Set innerHTML of empty fragment', async () => {
 	// The code below is not a common use-case.
 	// It is written only for testing. Avoid direct DOM manipulation whenever possible.
-	const forTest = {
-		template: `
-        <div>
-          <div v-frag ref="fragment" />
-        </div>
-        `,
+	const usage = defineComponent({
+		template: '<app><frag v-frag ref="fragment" /></app>',
 		directives: { frag },
 		data() {
 			return {
@@ -1203,23 +1199,35 @@ test('Set innerHTML of empty fragment', async () => {
 		},
 		watch: {
 			html() {
-				this.$refs.fragment.innerHTML = this.html;
+				(this.$refs.fragment as HTMLElement).innerHTML = this.html;
 			},
 		},
-	};
+	});
 
-	const wrapper = mount(forTest);
+	const wrapper = mount(usage);
+	expect(wrapper.html()).toBe(
+		outdent`
+		<app>
+		  <!---->
+		</app>
+		`,
+	);
 
-	await wrapper.setData({ html: '<span>first</span><span>second</span>' });
-	expect(wrapper.html()).toBe('<div><span>first</span><span>second</span></div>');
+	const html = '<span>first</span><span>second</span>';
+	const output = '<app><span>first</span><span>second</span></app>';
+
+	await wrapper.setData({ html });
+	expect(wrapper.html()).toBe(output);
 
 	await wrapper.setData({ html: '' });
-	expect(wrapper.html()).toBe(outdent`
-  <div>
-    <!---->
-  </div>`);
+	expect(wrapper.html()).toBe(
+		outdent`
+		<app>
+		  <!---->
+		</app>
+		`,
+	);
 
-	// Set innerHTML to empty string, then set innerHTML
-	await wrapper.setData({ html: '<span>first</span><span>second</span>' });
-	expect(wrapper.html()).toBe('<div><span>first</span><span>second</span></div>');
+	await wrapper.setData({ html });
+	expect(wrapper.html()).toBe(output);
 });
