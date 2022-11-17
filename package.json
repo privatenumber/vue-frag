@@ -31,6 +31,7 @@
 		"build": "rollup -c --environment NODE_ENV:production",
 		"pretest": "npm run build",
 		"test": "pnpm build && jest",
+		"test:tsd": "tsd",
 		"lint": "eslint .",
 		"prepack": "pnpm build && clean-pkg-json -k unpkg"
 	},
@@ -64,10 +65,14 @@
 		"rollup-plugin-filesize": "^9.1.1",
 		"rollup-plugin-terser": "^7.0.2",
 		"simple-git-hooks": "^2.8.0",
+		"tsd": "^0.24.1",
 		"typescript": "^4.4.3",
 		"vue": "^2.6.14",
 		"vue-server-renderer": "^2.6.14",
 		"vue-template-compiler": "^2.6.14"
+	},
+	"tsd": {
+		"directory": "test"
 	},
 	"eslintConfig": {
 		"extends": "@pvtnbr",
