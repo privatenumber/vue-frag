@@ -278,17 +278,24 @@ const frag = {
 
 		Object.defineProperty(element, 'innerHTML', {
 			set(htmlString) {
-				const domify = document.createElement('div');
-				domify.innerHTML = htmlString;
+				// If it has childrem (non-placeholder), remove them
+				if (this.frag[0] !== placeholder) {
+					this.frag.slice().forEach(
+						// eslint-disable-next-line unicorn/prefer-dom-node-remove
+						child => this.removeChild(child),
+					);
+				}
 
-				const oldNodesIndex = this.frag.length;
+				if (htmlString) {
+					const domify = document.createElement('div');
+					domify.innerHTML = htmlString;
 
-				// Array.from makes a copy of the NodeList, which is live updating as we appendChild
-				Array.from(domify.childNodes).forEach((node) => {
-					// eslint-disable-next-line unicorn/prefer-dom-node-append
-					this.appendChild(node);
-				});
-				domify.append(...this.frag.splice(0, oldNodesIndex));
+					// Array.from makes a copy of the NodeList, which is live updating as we appendChild
+					Array.from(domify.childNodes).forEach((node) => {
+						// eslint-disable-next-line unicorn/prefer-dom-node-append
+						this.appendChild(node);
+					});
+				}
 			},
 			get() {
 				return '';
