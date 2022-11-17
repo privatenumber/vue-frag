@@ -2,9 +2,8 @@
  * @jest-environment jsdom
  */
 
-import Vue from 'vue';
+import Vue, { defineComponent } from 'vue';
 import { mount } from '@vue/test-utils';
-import { defineComponent } from '@vue/composition-api';
 import outdent from 'outdent';
 import frag from '..';
 import {
@@ -1204,6 +1203,7 @@ test('Set innerHTML of empty fragment', async () => {
 		},
 	});
 
+	// @ts-expect-error @vue/test-utils has outdated types
 	const wrapper = mount(usage);
 	expect(wrapper.html()).toBe(
 		outdent`
