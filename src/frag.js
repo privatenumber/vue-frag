@@ -176,6 +176,8 @@ function insertBefore(
 	insertNode,
 	insertBeforeNode,
 ) {
+	if (insertNode.parentElement && insertNode.nodeType === Node.ELEMENT_NODE && $fakeParent in insertNode) return insertNode
+	
 	// Should this be leaf nodes?
 	const insertNodes = insertNode.frag || [insertNode];
 
@@ -215,6 +217,8 @@ function insertBefore(
 }
 
 function appendChild(node) {
+	if (node.parentElement && node.nodeType === Node.ELEMENT_NODE && $fakeParent in node) return node
+	
 	const { frag } = this;
 	const lastChild = frag[frag.length - 1];
 

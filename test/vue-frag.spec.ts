@@ -1231,3 +1231,47 @@ test('Set innerHTML of empty fragment', async () => {
 	await wrapper.setData({ html });
 	expect(wrapper.html()).toBe(output);
 });
+
+test('keep-alive', async () => {
+	const usage = {
+		template: `
+			<app>
+				<frag v-frag>
+					<keep-alive>
+						<component :is="children[index]"></component>
+					</keep-alive>
+				</frag>
+			</app>
+		`,
+		directives: { frag },
+		components: {
+			A: { template: '<div>A</div>' },
+			B: { template: '<div>B</div>' },
+			C: { template: '<div>C</div>' },
+		},
+		data() {
+			return {
+				index: 0,
+				children: ['A', 'B', 'A', 'C', 'A'],
+			};
+		},
+	};
+
+	const wrapper = dualMount(usage);
+	expect(wrapper.frag.html()).toBe('<app>\n  <div>A</div>\n</app>');
+
+	await wrapper.setData({ index: 1 });
+	expect(wrapper.frag.html()).toBe('<app>\n  <div>B</div>\n</app>');
+
+	await wrapper.setData({ index: 2 });
+	expect(wrapper.frag.html()).toBe('<app>\n  <div>A</div>\n</app>');
+
+	await wrapper.setData({ index: 3 });
+	expect(wrapper.frag.html()).toBe('<app>\n  <div>C</div>\n</app>');
+
+	await wrapper.setData({ index: 4 });
+	expect(wrapper.frag.html()).toBe('<app>\n  <div>A</div>\n</app>');
+
+	await wrapper.setData({ index: 5 });
+	expect(wrapper.frag.html()).toBe('<app>\n  <!---->\n</app>');
+});
