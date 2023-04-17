@@ -81,6 +81,16 @@
 		"rules": {
 			"symbol-description": "off",
 			"unicorn/no-array-for-each": "off"
-		}
+		},
+		"overrides": [
+			{
+				"files": "README.md/*",
+				"rules": {
+					"vue/multiline-html-element-content-newline": "off",
+					"vue/require-v-for-key": "off",
+					"vue/no-undef-components": "off"
+				}
+			}
+		]
 	}
 }
