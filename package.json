@@ -24,8 +24,8 @@
 	],
 	"main": "dist/frag.cjs.js",
 	"module": "dist/frag.esm.js",
-	"types": "frag.d.ts",
 	"unpkg": "dist/frag.js",
+	"types": "frag.d.ts",
 	"scripts": {
 		"prepare": "simple-git-hooks",
 		"build": "rollup -c --environment NODE_ENV:production",
