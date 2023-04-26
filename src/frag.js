@@ -176,11 +176,7 @@ function insertBefore(
 	insertNode,
 	insertBeforeNode,
 ) {
-	if (
-		insertNode.nodeType === Node.ELEMENT_NODE
-		&& $fakeParent in insertNode
-		&& insertNode.parentElement
-	) {
+	if (isFrag(this) && insertNode.parentElement) {
 		return insertNode;
 	}
 
@@ -223,11 +219,7 @@ function insertBefore(
 }
 
 function appendChild(node) {
-	if (
-		node.nodeType === Node.ELEMENT_NODE
-		&& $fakeParent in node
-		&& node.parentElement
-	) {
+	if ($fakeParent in node && node.parentElement) {
 		return node;
 	}
 
