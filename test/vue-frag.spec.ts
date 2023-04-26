@@ -1232,6 +1232,7 @@ test('Set innerHTML of empty fragment', async () => {
 	expect(wrapper.html()).toBe(output);
 });
 
+// #61
 test('keep-alive', async () => {
 	const usage = {
 		template: `
