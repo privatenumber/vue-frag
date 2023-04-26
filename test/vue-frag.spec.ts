@@ -1235,13 +1235,13 @@ test('Set innerHTML of empty fragment', async () => {
 test('keep-alive', async () => {
 	const usage = {
 		template: `
-			<app>
-				<frag v-frag>
-					<keep-alive>
-						<component :is="children[index]"></component>
-					</keep-alive>
-				</frag>
-			</app>
+		<app>
+			<frag v-frag>
+				<keep-alive>
+					<component :is="component"></component>
+				</keep-alive>
+			</frag>
+		</app>
 		`,
 		directives: { frag },
 		components: {
@@ -1251,27 +1251,32 @@ test('keep-alive', async () => {
 		},
 		data() {
 			return {
-				index: 0,
-				children: ['A', 'B', 'A', 'C', 'A'],
+				component: 'A',
 			};
 		},
 	};
 
 	const wrapper = dualMount(usage);
 	expect(wrapper.frag.html()).toBe('<app>\n  <div>A</div>\n</app>');
+	wrapper.expectMatchingDom();
 
-	await wrapper.setData({ index: 1 });
+	await wrapper.setData({ component: 'B' });
 	expect(wrapper.frag.html()).toBe('<app>\n  <div>B</div>\n</app>');
+	wrapper.expectMatchingDom();
 
-	await wrapper.setData({ index: 2 });
+	await wrapper.setData({ component: 'A' });
 	expect(wrapper.frag.html()).toBe('<app>\n  <div>A</div>\n</app>');
+	wrapper.expectMatchingDom();
 
-	await wrapper.setData({ index: 3 });
+	await wrapper.setData({ component: 'C' });
 	expect(wrapper.frag.html()).toBe('<app>\n  <div>C</div>\n</app>');
+	wrapper.expectMatchingDom();
 
-	await wrapper.setData({ index: 4 });
+	await wrapper.setData({ component: 'A' });
 	expect(wrapper.frag.html()).toBe('<app>\n  <div>A</div>\n</app>');
+	wrapper.expectMatchingDom();
 
-	await wrapper.setData({ index: 5 });
+	await wrapper.setData({ component: '' });
 	expect(wrapper.frag.html()).toBe('<app>\n  <!---->\n</app>');
+	wrapper.expectMatchingDom();
 });

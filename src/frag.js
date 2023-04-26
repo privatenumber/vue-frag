@@ -177,9 +177,9 @@ function insertBefore(
 	insertBeforeNode,
 ) {
 	if (
-		insertNode.parentElement
-		&& insertNode.nodeType === Node.ELEMENT_NODE
+		insertNode.nodeType === Node.ELEMENT_NODE
 		&& $fakeParent in insertNode
+		&& insertNode.parentElement
 	) {
 		return insertNode;
 	}
@@ -224,9 +224,9 @@ function insertBefore(
 
 function appendChild(node) {
 	if (
-		node.parentElement
-		&& node.nodeType === Node.ELEMENT_NODE
+		node.nodeType === Node.ELEMENT_NODE
 		&& $fakeParent in node
+		&& node.parentElement
 	) {
 		return node;
 	}
