@@ -1,7 +1,7 @@
 const $placeholder = Symbol();
 const $fakeParent = Symbol();
-const nextSiblingPatched = Symbol();
-const childNodesPatched = Symbol();
+const $nextSiblingPatched = Symbol();
+const $childNodesPatched = Symbol();
 
 const isFrag = node => 'frag' in node;
 
@@ -27,11 +27,11 @@ function patchParentNode(
 }
 
 function patchNextSibling(node) {
-	if (nextSiblingPatched in node) {
+	if ($nextSiblingPatched in node) {
 		return;
 	}
 
-	node[nextSiblingPatched] = true;
+	node[$nextSiblingPatched] = true;
 
 	Object.defineProperty(
 		node,
@@ -83,11 +83,11 @@ function getChildNodesWithFragments(node) {
 }
 
 function patchChildNodes(node) {
-	if (childNodesPatched in node) {
+	if ($childNodesPatched in node) {
 		return;
 	}
 
-	node[childNodesPatched] = true;
+	node[$childNodesPatched] = true;
 
 	Object.defineProperties(node, {
 		childNodes: {
