@@ -35,7 +35,7 @@
 		"prepack": "pnpm build && clean-pkg-json -k unpkg"
 	},
 	"simple-git-hooks": {
-		"pre-commit": "pnpm build && pnpm lint-staged"
+		"pre-commit": "pnpm lint-staged"
 	},
 	"lint-staged": {
 		"*.{js,ts}": [
