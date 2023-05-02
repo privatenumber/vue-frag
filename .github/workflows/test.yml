@@ -1,7 +1,7 @@
 name: Test
 on:
   push:
-    branches: [develop, ci-vite]
+    branches: [develop]
   pull_request:
     branches: [master, develop]
 
