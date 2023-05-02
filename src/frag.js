@@ -219,7 +219,13 @@ function insertBefore(
 }
 
 function appendChild(node) {
-	if ($fakeParent in node && node.parentElement) {
+	if (
+		// Parent already patched
+		node[$fakeParent] === this
+
+		// Previously inserted (reinserted via keep-alive)
+		&& node.parentElement
+	) {
 		return node;
 	}
 
