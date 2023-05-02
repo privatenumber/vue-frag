@@ -165,10 +165,6 @@ function removeChild(node) {
 			}
 
 			node.remove();
-
-			if ($fakeParent in node) {
-				delete node[$fakeParent];
-			}
 		}
 	} else {
 		// For frag parent
