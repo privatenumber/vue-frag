@@ -183,15 +183,25 @@ function insertBefore(
 	insertNode,
 	insertBeforeNode,
 ) {
-	if (isFrag(this) && insertNode.parentElement) {
-		return insertNode;
-	}
-
 	// Should this be leaf nodes?
 	const insertNodes = insertNode.frag || [insertNode];
 
 	// If this element is a fragment, insert nodes in virtual fragment
 	if (isFrag(this)) {
+		/**
+		 * In this case, it's impossible for insertNode.frag to be defined
+		 * aka insertNode is always a single node
+		 */
+		if (
+			// Parent already patched
+			insertNode[$fakeParent] === this
+
+			// Previously inserted (reinserted via keep-alive)
+			&& insertNode.parentElement
+		) {
+			return insertNode;
+		}
+
 		const { frag } = this;
 
 		if (insertBeforeNode) {
