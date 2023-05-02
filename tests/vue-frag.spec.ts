@@ -1,11 +1,8 @@
-/**
- * @jest-environment jsdom
- */
-
+import { describe, test, expect } from 'vitest';
 import Vue, { defineComponent } from 'vue';
 import { mount } from '@vue/test-utils';
 import outdent from 'outdent';
-import frag from '..';
+import frag from '../src/index.esm.js';
 import {
 	dualMount,
 	createMountTarget,
@@ -1230,4 +1227,104 @@ test('Set innerHTML of empty fragment', async () => {
 
 	await wrapper.setData({ html });
 	expect(wrapper.html()).toBe(output);
+});
+
+// #61
+test('keep-alive - appendChild', async () => {
+	const usage = {
+		template: `
+		<app>
+			<frag v-frag>
+				<keep-alive>
+					<component :is="component"></component>
+				</keep-alive>
+			</frag>
+		</app>
+		`,
+		directives: { frag },
+		components: {
+			A: { template: '<div>A</div>' },
+			B: { template: '<div>B</div>' },
+			C: { template: '<div>C</div>' },
+		},
+		data() {
+			return {
+				component: 'A',
+			};
+		},
+	};
+
+	const wrapper = dualMount(usage);
+	expect(wrapper.frag.html()).toBe('<app>\n  <div>A</div>\n</app>');
+	wrapper.expectMatchingDom();
+
+	await wrapper.setData({ component: 'B' });
+	expect(wrapper.frag.html()).toBe('<app>\n  <div>B</div>\n</app>');
+	wrapper.expectMatchingDom();
+
+	await wrapper.setData({ component: 'A' });
+	expect(wrapper.frag.html()).toBe('<app>\n  <div>A</div>\n</app>');
+	wrapper.expectMatchingDom();
+
+	await wrapper.setData({ component: 'C' });
+	expect(wrapper.frag.html()).toBe('<app>\n  <div>C</div>\n</app>');
+	wrapper.expectMatchingDom();
+
+	await wrapper.setData({ component: 'A' });
+	expect(wrapper.frag.html()).toBe('<app>\n  <div>A</div>\n</app>');
+	wrapper.expectMatchingDom();
+
+	await wrapper.setData({ component: '' });
+	expect(wrapper.frag.html()).toBe('<app>\n  <!---->\n</app>');
+	wrapper.expectMatchingDom();
+});
+
+// #61 2
+test('keep-alive - insertBefore', async () => {
+	const usage = {
+		template: `
+		<app>
+			<frag v-frag>
+				<keep-alive>
+					<component :is="component"></component>
+				</keep-alive>1
+			</frag>
+		</app>
+		`,
+		directives: { frag },
+		components: {
+			A: { template: '<div>A</div>' },
+			B: { template: '<div>B</div>' },
+			C: { template: '<div>C</div>' },
+		},
+		data() {
+			return {
+				component: 'A',
+			};
+		},
+	};
+
+	const wrapper = dualMount(usage);
+	expect(wrapper.frag.html()).toBe('<app>\n  <div>A</div>1\n</app>');
+	wrapper.expectMatchingDom();
+
+	await wrapper.setData({ component: 'B' });
+	expect(wrapper.frag.html()).toBe('<app>\n  <div>B</div>1\n</app>');
+	wrapper.expectMatchingDom();
+
+	await wrapper.setData({ component: 'A' });
+	expect(wrapper.frag.html()).toBe('<app>\n  <div>A</div>1\n</app>');
+	wrapper.expectMatchingDom();
+
+	await wrapper.setData({ component: 'C' });
+	expect(wrapper.frag.html()).toBe('<app>\n  <div>C</div>1\n</app>');
+	wrapper.expectMatchingDom();
+
+	await wrapper.setData({ component: 'A' });
+	expect(wrapper.frag.html()).toBe('<app>\n  <div>A</div>1\n</app>');
+	wrapper.expectMatchingDom();
+
+	await wrapper.setData({ component: '' });
+	expect(wrapper.frag.html()).toBe('<app>\n  <!---->1\n</app>');
+	wrapper.expectMatchingDom();
 });

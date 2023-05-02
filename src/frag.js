@@ -1,56 +1,57 @@
 const $placeholder = Symbol();
 const $fakeParent = Symbol();
-const nextSiblingPatched = Symbol();
-const childNodesPatched = Symbol();
+const $nextSiblingPatched = Symbol();
+const $childNodesPatched = Symbol();
 
 const isFrag = node => 'frag' in node;
 
-function patchParentNode(
+const parentNodeDescriptor = {
+	get() {
+		return this[$fakeParent] || this.parentElement;
+	},
+	configurable: true,
+};
+
+const patchParentNode = (
 	node,
 	fakeParent,
-) {
+) => {
 	if ($fakeParent in node) {
 		return;
 	}
 
 	node[$fakeParent] = fakeParent;
 
-	Object.defineProperty(
-		node,
-		'parentNode',
-		{
-			get() {
-				return this[$fakeParent] || this.parentElement;
-			},
-		},
-	);
-}
+	Object.defineProperty(node, 'parentNode', parentNodeDescriptor);
+};
 
-function patchNextSibling(node) {
-	if (nextSiblingPatched in node) {
+const nextSiblingDescriptor = {
+	get() {
+		const { childNodes } = this.parentNode;
+		const index = childNodes.indexOf(this);
+		if (index > -1) {
+			return childNodes[index + 1] || null;
+		}
+
+		return null;
+	},
+};
+
+const patchNextSibling = (node) => {
+	if ($nextSiblingPatched in node) {
 		return;
 	}
 
-	node[nextSiblingPatched] = true;
+	node[$nextSiblingPatched] = true;
 
 	Object.defineProperty(
 		node,
 		'nextSibling',
-		{
-			get() {
-				const { childNodes } = this.parentNode;
-				const index = childNodes.indexOf(this);
-				if (index > -1) {
-					return childNodes[index + 1] || null;
-				}
-
-				return null;
-			},
-		},
+		nextSiblingDescriptor,
 	);
-}
+};
 
-function getTopFragment(node, fromParent) {
+const getTopFragment = (node, fromParent) => {
 	while (node.parentNode !== fromParent) {
 		const { parentNode } = node;
 		if (parentNode) {
@@ -59,12 +60,12 @@ function getTopFragment(node, fromParent) {
 	}
 
 	return node;
-}
+};
 
 let getChildNodes;
 
 // For a parent to get fake children
-function getChildNodesWithFragments(node) {
+const getChildNodesWithFragments = (node) => {
 	// In case SSR
 	if (!getChildNodes) {
 		const childNodesDescriptor = Object.getOwnPropertyDescriptor(Node.prototype, 'childNodes');
@@ -80,32 +81,38 @@ function getChildNodesWithFragments(node) {
 	return childNodes.filter(
 		(childNode, index) => childNode !== childNodes[index - 1],
 	);
+};
+
+const childNodesDescriptor = {
+	get() {
+		return this.frag || getChildNodesWithFragments(this);
+	},
+};
+
+const firstChildDescriptor = {
+	get() {
+		return this.childNodes[0] || null;
+	},
+};
+
+function hasChildNodes() {
+	return this.childNodes.length > 0;
 }
 
-function patchChildNodes(node) {
-	if (childNodesPatched in node) {
+const patchChildNodes = (node) => {
+	if ($childNodesPatched in node) {
 		return;
 	}
 
-	node[childNodesPatched] = true;
+	node[$childNodesPatched] = true;
 
 	Object.defineProperties(node, {
-		childNodes: {
-			get() {
-				return this.frag || getChildNodesWithFragments(this);
-			},
-		},
-		firstChild: {
-			get() {
-				return this.childNodes[0] || null;
-			},
-		},
+		childNodes: childNodesDescriptor,
+		firstChild: firstChildDescriptor,
 	});
 
-	node.hasChildNodes = function () {
-		return this.childNodes.length > 0;
-	};
-}
+	node.hasChildNodes = hasChildNodes;
+};
 
 /**
  * Methods overwritten for vue-frag to use internally
@@ -134,16 +141,16 @@ const getFragmentLeafNodes = children => Array.prototype.concat(
 	)),
 );
 
-function addPlaceholder(
+const addPlaceholder = (
 	node,
 	insertBeforeNode,
-) {
+) => {
 	const placeholder = node[$placeholder];
 
 	insertBeforeNode.before(placeholder);
 	patchParentNode(placeholder, node);
 	node.frag.unshift(placeholder);
-}
+};
 
 function removeChild(node) {
 	if (isFrag(this)) {
@@ -181,6 +188,20 @@ function insertBefore(
 
 	// If this element is a fragment, insert nodes in virtual fragment
 	if (isFrag(this)) {
+		/**
+		 * In this case, it's impossible for insertNode.frag to be defined
+		 * aka insertNode is always a single node
+		 */
+		if (
+			// Parent already patched
+			insertNode[$fakeParent] === this
+
+			// Previously inserted (reinserted via keep-alive)
+			&& insertNode.parentElement
+		) {
+			return insertNode;
+		}
+
 		const { frag } = this;
 
 		if (insertBeforeNode) {
@@ -215,6 +236,16 @@ function insertBefore(
 }
 
 function appendChild(node) {
+	if (
+		// Parent already patched
+		node[$fakeParent] === this
+
+		// Previously inserted (reinserted via keep-alive)
+		&& node.parentElement
+	) {
+		return node;
+	}
+
 	const { frag } = this;
 	const lastChild = frag[frag.length - 1];
 
@@ -228,13 +259,39 @@ function appendChild(node) {
 	return node;
 }
 
-function removePlaceholder(node) {
+const removePlaceholder = (node) => {
 	const placeholder = node[$placeholder];
 	if (node.frag[0] === placeholder) {
 		node.frag.shift();
 		placeholder.remove();
 	}
-}
+};
+
+const innerHTMLDescriptor = {
+	set(htmlString) {
+		// If it has childrem (non-placeholder), remove them
+		if (this.frag[0] !== this[$placeholder]) {
+			this.frag.slice().forEach(
+				// eslint-disable-next-line unicorn/prefer-dom-node-remove
+				child => this.removeChild(child),
+			);
+		}
+
+		if (htmlString) {
+			const domify = document.createElement('div');
+			domify.innerHTML = htmlString;
+
+			// Array.from makes a copy of the NodeList, which is live updating as we appendChild
+			Array.from(domify.childNodes).forEach((node) => {
+				// eslint-disable-next-line unicorn/prefer-dom-node-append
+				this.appendChild(node);
+			});
+		}
+	},
+	get() {
+		return '';
+	},
+};
 
 const frag = {
 	inserted(element) {
@@ -276,31 +333,7 @@ const frag = {
 			before,
 		});
 
-		Object.defineProperty(element, 'innerHTML', {
-			set(htmlString) {
-				// If it has childrem (non-placeholder), remove them
-				if (this.frag[0] !== placeholder) {
-					this.frag.slice().forEach(
-						// eslint-disable-next-line unicorn/prefer-dom-node-remove
-						child => this.removeChild(child),
-					);
-				}
-
-				if (htmlString) {
-					const domify = document.createElement('div');
-					domify.innerHTML = htmlString;
-
-					// Array.from makes a copy of the NodeList, which is live updating as we appendChild
-					Array.from(domify.childNodes).forEach((node) => {
-						// eslint-disable-next-line unicorn/prefer-dom-node-append
-						this.appendChild(node);
-					});
-				}
-			},
-			get() {
-				return '';
-			},
-		});
+		Object.defineProperty(element, 'innerHTML', innerHTMLDescriptor);
 
 		if (parentNode) {
 			Object.assign(parentNode, {
