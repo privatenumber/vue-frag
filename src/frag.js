@@ -5,6 +5,13 @@ const $childNodesPatched = Symbol();
 
 const isFrag = node => 'frag' in node;
 
+const parentNodeDescriptor = {
+	get() {
+		return this[$fakeParent] || this.parentElement;
+	},
+	configurable: true,
+};
+
 const patchParentNode = (
 	node,
 	fakeParent,
@@ -15,15 +22,19 @@ const patchParentNode = (
 
 	node[$fakeParent] = fakeParent;
 
-	Object.defineProperty(
-		node,
-		'parentNode',
-		{
-			get() {
-				return this[$fakeParent] || this.parentElement;
-			},
-		},
-	);
+	Object.defineProperty(node, 'parentNode', parentNodeDescriptor);
+};
+
+const nextSiblingDescriptor = {
+	get() {
+		const { childNodes } = this.parentNode;
+		const index = childNodes.indexOf(this);
+		if (index > -1) {
+			return childNodes[index + 1] || null;
+		}
+
+		return null;
+	},
 };
 
 const patchNextSibling = (node) => {
@@ -36,17 +47,7 @@ const patchNextSibling = (node) => {
 	Object.defineProperty(
 		node,
 		'nextSibling',
-		{
-			get() {
-				const { childNodes } = this.parentNode;
-				const index = childNodes.indexOf(this);
-				if (index > -1) {
-					return childNodes[index + 1] || null;
-				}
-
-				return null;
-			},
-		},
+		nextSiblingDescriptor,
 	);
 };
 
@@ -82,7 +83,23 @@ const getChildNodesWithFragments = (node) => {
 	);
 };
 
-function patchChildNodes(node) {
+const childNodesDescriptor = {
+	get() {
+		return this.frag || getChildNodesWithFragments(this);
+	},
+};
+
+const firstChildDescriptor = {
+	get() {
+		return this.childNodes[0] || null;
+	},
+};
+
+function hasChildNodes() {
+	return this.childNodes.length > 0;
+}
+
+const patchChildNodes = (node) => {
 	if ($childNodesPatched in node) {
 		return;
 	}
@@ -90,22 +107,12 @@ function patchChildNodes(node) {
 	node[$childNodesPatched] = true;
 
 	Object.defineProperties(node, {
-		childNodes: {
-			get() {
-				return this.frag || getChildNodesWithFragments(this);
-			},
-		},
-		firstChild: {
-			get() {
-				return this.childNodes[0] || null;
-			},
-		},
+		childNodes: childNodesDescriptor,
+		firstChild: firstChildDescriptor,
 	});
 
-	node.hasChildNodes = function () {
-		return this.childNodes.length > 0;
-	};
-}
+	node.hasChildNodes = hasChildNodes;
+};
 
 /**
  * Methods overwritten for vue-frag to use internally
@@ -158,6 +165,10 @@ function removeChild(node) {
 			}
 
 			node.remove();
+
+			if ($fakeParent in node) {
+				delete node[$fakeParent];
+			}
 		}
 	} else {
 		// For frag parent
@@ -250,6 +261,32 @@ const removePlaceholder = (node) => {
 	}
 };
 
+const innerHTMLDescriptor = {
+	set(htmlString) {
+		// If it has childrem (non-placeholder), remove them
+		if (this.frag[0] !== this[$placeholder]) {
+			this.frag.slice().forEach(
+				// eslint-disable-next-line unicorn/prefer-dom-node-remove
+				child => this.removeChild(child),
+			);
+		}
+
+		if (htmlString) {
+			const domify = document.createElement('div');
+			domify.innerHTML = htmlString;
+
+			// Array.from makes a copy of the NodeList, which is live updating as we appendChild
+			Array.from(domify.childNodes).forEach((node) => {
+				// eslint-disable-next-line unicorn/prefer-dom-node-append
+				this.appendChild(node);
+			});
+		}
+	},
+	get() {
+		return '';
+	},
+};
+
 const frag = {
 	inserted(element) {
 		const {
@@ -290,31 +327,7 @@ const frag = {
 			before,
 		});
 
-		Object.defineProperty(element, 'innerHTML', {
-			set(htmlString) {
-				// If it has childrem (non-placeholder), remove them
-				if (this.frag[0] !== placeholder) {
-					this.frag.slice().forEach(
-						// eslint-disable-next-line unicorn/prefer-dom-node-remove
-						child => this.removeChild(child),
-					);
-				}
-
-				if (htmlString) {
-					const domify = document.createElement('div');
-					domify.innerHTML = htmlString;
-
-					// Array.from makes a copy of the NodeList, which is live updating as we appendChild
-					Array.from(domify.childNodes).forEach((node) => {
-						// eslint-disable-next-line unicorn/prefer-dom-node-append
-						this.appendChild(node);
-					});
-				}
-			},
-			get() {
-				return '';
-			},
-		});
+		Object.defineProperty(element, 'innerHTML', innerHTMLDescriptor);
 
 		if (parentNode) {
 			Object.assign(parentNode, {
