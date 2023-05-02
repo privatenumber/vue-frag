@@ -5,10 +5,10 @@ const $childNodesPatched = Symbol();
 
 const isFrag = node => 'frag' in node;
 
-function patchParentNode(
+const patchParentNode = (
 	node,
 	fakeParent,
-) {
+) => {
 	if ($fakeParent in node) {
 		return;
 	}
@@ -24,9 +24,9 @@ function patchParentNode(
 			},
 		},
 	);
-}
+};
 
-function patchNextSibling(node) {
+const patchNextSibling = (node) => {
 	if ($nextSiblingPatched in node) {
 		return;
 	}
@@ -48,9 +48,9 @@ function patchNextSibling(node) {
 			},
 		},
 	);
-}
+};
 
-function getTopFragment(node, fromParent) {
+const getTopFragment = (node, fromParent) => {
 	while (node.parentNode !== fromParent) {
 		const { parentNode } = node;
 		if (parentNode) {
@@ -59,12 +59,12 @@ function getTopFragment(node, fromParent) {
 	}
 
 	return node;
-}
+};
 
 let getChildNodes;
 
 // For a parent to get fake children
-function getChildNodesWithFragments(node) {
+const getChildNodesWithFragments = (node) => {
 	// In case SSR
 	if (!getChildNodes) {
 		const childNodesDescriptor = Object.getOwnPropertyDescriptor(Node.prototype, 'childNodes');
@@ -80,7 +80,7 @@ function getChildNodesWithFragments(node) {
 	return childNodes.filter(
 		(childNode, index) => childNode !== childNodes[index - 1],
 	);
-}
+};
 
 function patchChildNodes(node) {
 	if ($childNodesPatched in node) {
@@ -134,16 +134,16 @@ const getFragmentLeafNodes = children => Array.prototype.concat(
 	)),
 );
 
-function addPlaceholder(
+const addPlaceholder = (
 	node,
 	insertBeforeNode,
-) {
+) => {
 	const placeholder = node[$placeholder];
 
 	insertBeforeNode.before(placeholder);
 	patchParentNode(placeholder, node);
 	node.frag.unshift(placeholder);
-}
+};
 
 function removeChild(node) {
 	if (isFrag(this)) {
@@ -242,13 +242,13 @@ function appendChild(node) {
 	return node;
 }
 
-function removePlaceholder(node) {
+const removePlaceholder = (node) => {
 	const placeholder = node[$placeholder];
 	if (node.frag[0] === placeholder) {
 		node.frag.shift();
 		placeholder.remove();
 	}
-}
+};
 
 const frag = {
 	inserted(element) {
