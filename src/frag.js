@@ -176,6 +176,10 @@ function insertBefore(
 	insertNode,
 	insertBeforeNode,
 ) {
+	if (isFrag(this) && insertNode.parentElement) {
+		return insertNode;
+	}
+
 	// Should this be leaf nodes?
 	const insertNodes = insertNode.frag || [insertNode];
 
@@ -215,6 +219,16 @@ function insertBefore(
 }
 
 function appendChild(node) {
+	if (
+		// Parent already patched
+		node[$fakeParent] === this
+
+		// Previously inserted (reinserted via keep-alive)
+		&& node.parentElement
+	) {
+		return node;
+	}
+
 	const { frag } = this;
 	const lastChild = frag[frag.length - 1];
 
