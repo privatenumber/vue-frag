@@ -1,7 +1,7 @@
 name: Test
 on:
   push:
-    branches: [develop]
+    branches: [develop, ci-vite]
   pull_request:
     branches: [master, develop]
 
@@ -28,6 +28,9 @@ jobs:
 
     - name: Lint
       run: pnpm lint
+
+    - name: Why Vite
+      run: pnpm why vite
 
     - name: Test
       run: pnpm test
