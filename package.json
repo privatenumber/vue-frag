@@ -32,7 +32,7 @@
 		"pretest": "npm run build",
 		"test": "pnpm build && jest",
 		"test:tsd": "tsd",
-		"lint": "eslint .",
+		"lint": "eslint --cache .",
 		"prepack": "pnpm build && clean-pkg-json -k unpkg"
 	},
 	"simple-git-hooks": {
@@ -40,7 +40,7 @@
 	},
 	"lint-staged": {
 		"*.{js,ts}": [
-			"eslint",
+			"eslint --cache",
 			"jest --bail --findRelatedTests"
 		]
 	},

@@ -20,3 +20,6 @@ node_modules/
 .env.test
 
 dist
+
+# Cache
+.eslintcache
