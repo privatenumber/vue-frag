@@ -29,8 +29,5 @@ jobs:
     - name: Lint
       run: pnpm lint
 
-    - name: Why Vite
-      run: pnpm why vite
-
     - name: Test
       run: pnpm test
