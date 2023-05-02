@@ -1,11 +1,8 @@
-/**
- * @jest-environment jsdom
- */
-
+import { describe, test, expect } from 'vitest';
 import Vue, { defineComponent } from 'vue';
 import { mount } from '@vue/test-utils';
 import outdent from 'outdent';
-import frag from '..';
+import frag from '../src/index.esm.js';
 import {
 	dualMount,
 	createMountTarget,

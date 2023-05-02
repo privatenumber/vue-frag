@@ -5,9 +5,5 @@
 		"moduleResolution": "node",
 		"lib": ["DOM"],
 		"target": "ES5",
-	},
-	"include": [
-		"test",
-		"rollup.config.ts"
-	]
+	}
 }

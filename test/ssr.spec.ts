@@ -1,5 +1,6 @@
+import { test, expect } from 'vitest';
 import { render } from '@vue/server-test-utils';
-import frag from '..';
+import frag from '../src/index.esm.js';
 
 test('SSR', async () => {
 	const wrapper = await render({
