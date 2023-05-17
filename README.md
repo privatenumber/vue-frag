@@ -4,12 +4,12 @@ Use [Vue 3's Fragment feature](https://v3.vuejs.org/guide/migration/fragments.ht
 
 ```vue
 <template>
-    <fragment> ⬅ This root element will not exist in the DOM
+    <Fragment> ⬅ This root element will not exist in the DOM
 
         <li>Element 1</li>
         <li>Element 2</li>
         <li>Element 3</li>
-    </fragment>
+    </Fragment>
 </template>
 
 <script>
@@ -56,9 +56,9 @@ The Component API is designed to be used at the root of the template. It should 
 Import `Fragment` and use it as the root element of your component:
 ```vue
 <template>
-    <fragment>
+    <Fragment>
         Hello world!
-    </fragment>
+    </Fragment>
 </template>
 
 <script>
@@ -116,20 +116,20 @@ Vue.directive('frag', frag)
 
 #### Returning multiple root nodes <a href="https://codepen.io/hirokiosame/pen/PoNVZbV"><img src="https://img.shields.io/badge/codepen.io-demo-blue" valign="bottom"></a>
 Component API
-```vue
+```html
 <template>
-    <fragment> <!-- This element will be unwrapped -->
+    <Fragment> <!-- This element will be unwrapped -->
 
         <div v-for="i in 10">
             {{ i }}
         </div>
-    </fragment>
+    </Fragment>
 </template>
 ```
 
 
 Directive API
-```vue
+```html
 <template>
     <div v-frag> <!-- This element will be unwrapped -->
 
@@ -143,17 +143,17 @@ Directive API
 #### Unwrapping the root node from a component
 Use the Directive API to unwrap the root node of a component.
 
-```vue
+```html
 <template>
     <div>
         <!-- Unwraps the root node of some-custom-component -->
-        <some-custom-component v-frag />
+        <SomeCustomComponent v-frag />
     </div>
 </template>
 ```
 
 #### Supports v-if too
-```vue
+```html
 <template>
     <div v-frag>
         <template v-if="isShown">
