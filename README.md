@@ -25,6 +25,13 @@ export default {
 
 👉 [Try it out on CodePen](https://codepen.io/hirokiosame/pen/PoNVZbV)!
 
+### Features
+- **✅ Multiple root nodes** Without creating a functional component!
+- **🔥 SSR** Unwraps the root element on client-side post-hydration!
+- **⚡️ Directives** Supports `v-if`, `v-for`, and `v-html`!
+- **👩‍🔬 Battle-tested** Checkout the tests [here](/test/)!
+
+
 <table>
    <td>
        <strong>🔥 Pro-tip</strong>
@@ -45,12 +52,6 @@ export default {
 		</picture>
 	</a>
 </p>
-
-## 🌟 Features
-- **✅ Multiple root nodes** Without creating a functional component!
-- **🔥 SSR** Unwraps the root element on client-side post-hydration!
-- **⚡️ Directives** Supports `v-if`, `v-for`, and `v-html`!
-- **👩‍🔬 Battle-tested** Checkout the tests [here](/test/)!
 
 ## 🚀 Install
 ```sh
