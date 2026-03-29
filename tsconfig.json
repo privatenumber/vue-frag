@@ -1,11 +1,9 @@
 {
 	"compilerOptions": {
-		"target": "ES5",
 		"lib": [
 			"DOM",
+			"ES2022",
 		],
-		"moduleResolution": "node",
-		"strict": true,
-		"esModuleInterop": true,
+		"moduleResolution": "bundler",
 	},
 }
