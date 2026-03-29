@@ -134,7 +134,7 @@ test('horizontal tree', () => {
 				<child-c />
 			</parent-c>
 		</app>
-		`.replaceAll(/[\t\n]/g, ''),
+		`.replace(/[\t\n]/g, ''),
 		directives: {
 			frag,
 		},

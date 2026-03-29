@@ -82,7 +82,7 @@ export const createNonFragApp = <V extends Vue>(fragComponent: ComponentOptions<
 
 	return {
 		...fragComponent,
-		template: fragComponent.template?.replaceAll(' v-frag', ''),
+		template: fragComponent.template?.replace(/ v-frag/g, ''),
 		components,
 	};
 };

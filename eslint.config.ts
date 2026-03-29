@@ -12,6 +12,12 @@ export default defineConfig([
 	},
 
 	{
+		rules: {
+			'unicorn/prefer-string-replace-all': 'off',
+		},
+	},
+
+	{
 		files: ['src/**/*'],
 		languageOptions: {
 			globals: {
