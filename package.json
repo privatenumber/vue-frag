@@ -29,6 +29,7 @@
 	"scripts": {
 		"build": "rollup -c --environment NODE_ENV:production",
 		"test": "vitest",
+		"type-check": "tsc",
 		"lint": "lintroll --cache --git",
 		"prepack": "pnpm build && clean-pkg-json -k unpkg"
 	},
