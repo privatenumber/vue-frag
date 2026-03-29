@@ -12,19 +12,19 @@ Vue.config.ignoredElements = ['app', 'frag'];
 
 test('Nested frags', async () => {
 	const ChildComp = defineComponent({
-		template: '<div v-frag>{{ depth }} <child-comp v-if="depth" :depth="depth - 1" /></div>',
+		directives: {
+			frag,
+		},
 		props: {
 			depth: {
 				type: Number,
 				default: 5,
 			},
 		},
-		directives: {
-			frag,
-		},
 		beforeCreate() {
 			this.$options.components!.ChildComp = ChildComp;
 		},
+		template: '<div v-frag>{{ depth }} <child-comp v-if="depth" :depth="depth - 1" /></div>',
 	});
 
 	const ParentComp = {
@@ -53,7 +53,6 @@ test('Nested frags', async () => {
 
 test('v-html', async () => {
 	const FragComponent = defineComponent({
-		template: '<frag v-frag v-html="code" />',
 		directives: {
 			frag,
 		},
@@ -68,6 +67,7 @@ test('v-html', async () => {
 				return `<child-a>${this.num}</child-a><child-b>${this.num + 1}</child-b>`;
 			},
 		},
+		template: '<frag v-frag v-html="code" />',
 	});
 
 	const usage = {
@@ -75,11 +75,9 @@ test('v-html', async () => {
 		components: {
 			FragComponent,
 		},
-		data() {
-			return {
-				num: 0,
-			};
-		},
+		data: () => ({
+			num: 0,
+		}),
 	};
 
 	const wrapper = mount(usage);
@@ -126,11 +124,9 @@ describe('Reactivity', () => {
 			components: {
 				FragComponent,
 			},
-			data() {
-				return {
-					number: 0,
-				};
-			},
+			data: () => ({
+				number: 0,
+			}),
 		};
 
 		const wrapper = dualMount(usage);
@@ -154,11 +150,9 @@ describe('Reactivity', () => {
 			directives: {
 				frag,
 			},
-			data() {
-				return {
-					show: false,
-				};
-			},
+			data: () => ({
+				show: false,
+			}),
 		};
 
 		const empty = outdent`
@@ -208,11 +202,9 @@ describe('Reactivity', () => {
 			components: {
 				FragComponent,
 			},
-			data() {
-				return {
-					show: false,
-				};
-			},
+			data: () => ({
+				show: false,
+			}),
 		};
 
 		const empty = outdent`
@@ -258,11 +250,9 @@ describe('Reactivity', () => {
 			components: {
 				FragComponent,
 			},
-			data() {
-				return {
-					num: 0,
-				};
-			},
+			data: () => ({
+				num: 0,
+			}),
 		};
 
 		const tpl = (content: string) => `<app>${content}</app>`;
@@ -304,11 +294,9 @@ describe('Reactivity', () => {
 			components: {
 				FragComponent,
 			},
-			data() {
-				return {
-					num: 1,
-				};
-			},
+			data: () => ({
+				num: 1,
+			}),
 		};
 
 		const tpl = (children: number[]) => outdent`
@@ -356,11 +344,9 @@ describe('Reactivity', () => {
 			components: {
 				FragComponent,
 			},
-			data() {
-				return {
-					show: false,
-				};
-			},
+			data: () => ({
+				show: false,
+			}),
 		};
 
 		const empty = outdent`
@@ -416,11 +402,9 @@ describe('Reactivity', () => {
 			components: {
 				FragComponent,
 			},
-			data() {
-				return {
-					num: 1,
-				};
-			},
+			data: () => ({
+				num: 1,
+			}),
 		};
 
 		const tpl = (children: string[]) => outdent`
@@ -457,11 +441,9 @@ test('Parent v-if', async () => {
 		components: {
 			FragComponent,
 		},
-		data() {
-			return {
-				show: true,
-			};
-		},
+		data: () => ({
+			show: true,
+		}),
 	};
 
 	const wrapper = dualMount(fragApp);
@@ -502,11 +484,9 @@ test('Parent multiple v-if', async () => {
 		components: {
 			FragComponent,
 		},
-		data() {
-			return {
-				show: true,
-			};
-		},
+		data: () => ({
+			show: true,
+		}),
 	};
 
 	const wrapper = dualMount(usage);
@@ -560,11 +540,9 @@ test('Parent nested v-if empty', async () => {
 			ChildComp,
 		},
 
-		data() {
-			return {
-				shown: true,
-			};
-		},
+		data: () => ({
+			shown: true,
+		}),
 	};
 
 	const attachTo = document.createElement('header');
@@ -607,11 +585,9 @@ test('Parent nested v-if text', async () => {
 			ChildComp,
 		},
 
-		data() {
-			return {
-				shown: false,
-			};
-		},
+		data: () => ({
+			shown: false,
+		}),
 	};
 
 	const attachTo = document.createElement('header');
@@ -646,11 +622,9 @@ test('Parent nested v-if', async () => {
 			frag,
 		},
 
-		data() {
-			return {
-				shown: true,
-			};
-		},
+		data: () => ({
+			shown: true,
+		}),
 	};
 
 	const ParentComp = {
@@ -664,11 +638,9 @@ test('Parent nested v-if', async () => {
 			ChildComp,
 		},
 
-		data() {
-			return {
-				shown: true,
-			};
-		},
+		data: () => ({
+			shown: true,
+		}),
 	};
 
 	const $parent = mount(ParentComp, {
@@ -712,11 +684,9 @@ test('child order change', async () => {
 		components: {
 			FragComponent,
 		},
-		data() {
-			return {
-				numbers: [1, 2, 3],
-			};
-		},
+		data: () => ({
+			numbers: [1, 2, 3],
+		}),
 	};
 
 	const spliceAndReverse = (vm: Vue & { numbers: number[] }) => {
@@ -760,11 +730,9 @@ test('v-if slot', async () => {
 		components: {
 			FragComponent,
 		},
-		data() {
-			return {
-				show: false,
-			};
-		},
+		data: () => ({
+			show: false,
+		}),
 	};
 
 	const empty = '<app class="wrapper">\n  <!---->\n</app>';
@@ -815,11 +783,9 @@ test('transition - swapping components', async () => {
 			ChildA,
 			ChildB,
 		},
-		data() {
-			return {
-				showA: true,
-			};
-		},
+		data: () => ({
+			showA: true,
+		}),
 	};
 
 	const wrapper = mount(usage, {
@@ -837,11 +803,9 @@ test('transition - swapping components', async () => {
 
 test('transition - frag to element', async () => {
 	const usage = {
-		data() {
-			return {
-				showA: true,
-			};
-		},
+		data: () => ({
+			showA: true,
+		}),
 		template: `
 		<app>
 			<transition :css="false">
@@ -888,11 +852,9 @@ test('updating sibling node - update', async () => {
 			Child,
 		},
 
-		data() {
-			return {
-				isVisible: true,
-			};
-		},
+		data: () => ({
+			isVisible: true,
+		}),
 	};
 
 	const wrapper = dualMount(usage);
@@ -928,11 +890,9 @@ test('updating sibling node - removal', async () => {
 			Child,
 		},
 
-		data() {
-			return {
-				isVisible: false,
-			};
-		},
+		data: () => ({
+			isVisible: false,
+		}),
 	};
 
 	const wrapper = dualMount(usage);
@@ -980,11 +940,9 @@ test('updating sibling node - removal - no nextSibling', async () => {
 			Child,
 		},
 
-		data() {
-			return {
-				isVisible: true,
-			};
-		},
+		data: () => ({
+			isVisible: true,
+		}),
 	};
 
 	const wrapper = dualMount(usage);
@@ -1020,12 +978,10 @@ test('updating sibling node - insertion - previous non-frag sibling', async () =
 			Child,
 		},
 
-		data() {
-			return {
-				isVisibleA: false,
-				isVisibleB: true,
-			};
-		},
+		data: () => ({
+			isVisibleA: false,
+			isVisibleB: true,
+		}),
 	};
 
 	const wrapper = dualMount(usage);
@@ -1057,12 +1013,10 @@ test('updating sibling node - insertion - placeholder before frag-child should b
 			Child,
 		},
 
-		data() {
-			return {
-				isVisibleA: true,
-				isVisibleB: true,
-			};
-		},
+		data: () => ({
+			isVisibleA: true,
+			isVisibleB: true,
+		}),
 	};
 
 	const wrapper = dualMount(usage);
@@ -1098,12 +1052,10 @@ test('updating sibling node - insertion', async () => {
 			Child,
 		},
 
-		data() {
-			return {
-				isVisibleA: true,
-				isVisibleB: true,
-			};
-		},
+		data: () => ({
+			isVisibleA: true,
+			isVisibleB: true,
+		}),
 	};
 
 	const wrapper = dualMount(usage);
@@ -1147,12 +1099,10 @@ test('nested fragments', async () => {
 			Fragment2: Fragment,
 		},
 
-		data() {
-			return {
-				id: 1,
-				fragment: 'Fragment',
-			};
-		},
+		data: () => ({
+			id: 1,
+			fragment: 'Fragment',
+		}),
 	};
 
 	const wrapper = dualMount(usage);
@@ -1186,18 +1136,16 @@ test('Set innerHTML of empty fragment', async () => {
 	// The code below is not a common use-case.
 	// It is written only for testing. Avoid direct DOM manipulation whenever possible.
 	const usage = defineComponent({
-		template: '<app><frag v-frag ref="fragment" /></app>',
 		directives: { frag },
-		data() {
-			return {
-				html: '',
-			};
-		},
+		data: () => ({
+			html: '',
+		}),
 		watch: {
 			html() {
 				(this.$refs.fragment as HTMLElement).innerHTML = this.html;
 			},
 		},
+		template: '<app><frag v-frag ref="fragment" /></app>',
 	});
 
 	// @ts-expect-error @vue/test-utils has outdated types
@@ -1247,11 +1195,9 @@ test('keep-alive - appendChild', async () => {
 			B: { template: '<div>B</div>' },
 			C: { template: '<div>C</div>' },
 		},
-		data() {
-			return {
-				component: 'A',
-			};
-		},
+		data: () => ({
+			component: 'A',
+		}),
 	};
 
 	const wrapper = dualMount(usage);
@@ -1297,11 +1243,9 @@ test('keep-alive - insertBefore', async () => {
 			B: { template: '<div>B</div>' },
 			C: { template: '<div>C</div>' },
 		},
-		data() {
-			return {
-				component: 'A',
-			};
-		},
+		data: () => ({
+			component: 'A',
+		}),
 	};
 
 	const wrapper = dualMount(usage);

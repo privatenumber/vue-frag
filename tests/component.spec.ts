@@ -7,10 +7,10 @@ Vue.config.ignoredElements = [/./];
 
 test('Basic usage', () => {
 	const FragComponent = defineComponent({
-		template: '<fragment>hello</fragment>',
 		components: {
 			Fragment,
 		},
+		template: '<fragment>hello</fragment>',
 	});
 
 	const fragApp = {

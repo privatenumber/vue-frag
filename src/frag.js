@@ -29,7 +29,7 @@ const nextSiblingDescriptor = {
 	get() {
 		const { childNodes } = this.parentNode;
 		const index = childNodes.indexOf(this);
-		if (index > -1) {
+		if (index !== -1) {
 			return childNodes[index + 1] || null;
 		}
 
@@ -126,7 +126,7 @@ function before(...nodes) {
 function remove() {
 	// If the fragment is being removed, all children, including placeholder should be removed
 	const { frag } = this;
-	const removed = frag.splice(0, frag.length);
+	const removed = frag.splice(0);
 	removed.forEach((node) => {
 		node.remove();
 	});
@@ -156,7 +156,7 @@ function removeChild(node) {
 	if (isFrag(this)) {
 		// If this is a fragment element
 		const hasChildInFragment = this.frag.indexOf(node);
-		if (hasChildInFragment > -1) {
+		if (hasChildInFragment !== -1) {
 			const [removedNode] = this.frag.splice(hasChildInFragment, 1);
 
 			// If last node, insert placeholder
@@ -171,7 +171,7 @@ function removeChild(node) {
 		const children = getChildNodesWithFragments(this);
 		const hasChild = children.indexOf(node);
 
-		if (hasChild > -1) {
+		if (hasChild !== -1) {
 			node.remove();
 		}
 	}
@@ -206,7 +206,7 @@ function insertBefore(
 
 		if (insertBeforeNode) {
 			const index = frag.indexOf(insertBeforeNode);
-			if (index > -1) {
+			if (index !== -1) {
 				frag.splice(index, 0, ...insertNodes);
 				insertBeforeNode.before(...insertNodes);
 			}
@@ -288,9 +288,7 @@ const innerHTMLDescriptor = {
 			});
 		}
 	},
-	get() {
-		return '';
-	},
+	get: () => '',
 };
 
 const frag = {

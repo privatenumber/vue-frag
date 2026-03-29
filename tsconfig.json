@@ -1,9 +1,11 @@
 {
 	"compilerOptions": {
+		"target": "ES5",
+		"lib": [
+			"DOM",
+		],
+		"moduleResolution": "node",
 		"strict": true,
 		"esModuleInterop": true,
-		"moduleResolution": "node",
-		"lib": ["DOM"],
-		"target": "ES5",
-	}
+	},
 }

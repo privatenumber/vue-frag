@@ -1,5 +1,6 @@
 import { expectType } from 'tsd';
-import Vue, { ComponentOptions } from 'vue';
+import type { ComponentOptions } from 'vue';
+import type Vue from 'vue';
 import { Fragment } from '..';
 
 type FragmentComponent = ComponentOptions<Vue, never, never, never, never, never> & {

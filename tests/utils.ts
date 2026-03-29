@@ -1,8 +1,9 @@
 import { expect } from 'vitest';
 import { mount } from '@vue/test-utils';
-import Vue, { ComponentOptions } from 'vue';
+import type { ComponentOptions } from 'vue';
+import type Vue from 'vue';
 
-function bfs(rootNode: Node) {
+const bfs = (rootNode: Node) => {
 	const queue = [rootNode];
 	const allNodes: Node[] = [];
 
@@ -14,7 +15,7 @@ function bfs(rootNode: Node) {
 	}
 
 	return allNodes;
-}
+};
 
 type SerializedNode = {
 	nodeName: string;
@@ -25,10 +26,10 @@ type SerializedNode = {
 	// hasChildNodes: boolean;
 };
 
-export function serializeNode(
+export const serializeNode = (
 	node: Node | null,
 	noReference?: boolean,
-) {
+) => {
 	if (!node) {
 		return node;
 	}
@@ -49,24 +50,22 @@ export function serializeNode(
 	}
 
 	return serialized;
-}
+};
 
-export function serializeDOMTree(rootNode: Node) {
-	return JSON.stringify(
-		bfs(rootNode).map(node => serializeNode(node)).filter(Boolean),
-		null,
-		'\t',
-	);
-}
+export const serializeDOMTree = (rootNode: Node) => JSON.stringify(
+	bfs(rootNode).map(node => serializeNode(node)).filter(Boolean),
+	null,
+	'\t',
+);
 
 // Vue replaces this node, so there's no need for cleanup
-export function createMountTarget() {
+export const createMountTarget = () => {
 	const mountTarget = document.createElement('div');
 	document.body.append(mountTarget);
 	return mountTarget;
-}
+};
 
-export function createNonFragApp<V extends Vue>(fragComponent: ComponentOptions<V>) {
+export const createNonFragApp = <V extends Vue>(fragComponent: ComponentOptions<V>) => {
 	type Component = ComponentOptions<V>;
 	let components: Component['components'];
 
@@ -83,12 +82,12 @@ export function createNonFragApp<V extends Vue>(fragComponent: ComponentOptions<
 
 	return {
 		...fragComponent,
-		template: fragComponent.template?.replace(/ v-frag/g, ''),
+		template: fragComponent.template?.replaceAll(' v-frag', ''),
 		components,
 	};
-}
+};
 
-export function dualMount<V extends Vue>(component: ComponentOptions<V>) {
+export const dualMount = <V extends Vue>(component: ComponentOptions<V>) => {
 	const normal = mount(createNonFragApp(component));
 	const frag = mount(component);
 
@@ -103,10 +102,10 @@ export function dualMount<V extends Vue>(component: ComponentOptions<V>) {
 			]);
 		},
 
-		expectMatchingDom() {
+		expectMatchingDom: () => {
 			expect(serializeDOMTree(frag.element)).toBe(
 				serializeDOMTree(normal.element),
 			);
 		},
 	};
-}
+};
