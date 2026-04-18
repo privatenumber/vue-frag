@@ -47,7 +47,7 @@
 		"jsdom": "^22.0.0",
 		"lintroll": "^1.30.0",
 		"outdent": "^0.8.0",
-		"rollup": "^3.22.0",
+		"rollup": "^4.60.2",
 		"rollup-plugin-filesize": "^10.0.0",
 		"typescript": "^6.0.2",
 		"vite": "^4.3.7",
